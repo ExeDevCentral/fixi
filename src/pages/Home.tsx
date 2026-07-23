@@ -1,0 +1,175 @@
+import React, { useState } from 'react';
+import { Navbar } from '../components/Navbar';
+import { Hero } from '../components/Hero';
+import { SearchBar } from '../components/SearchBar';
+import { ProviderGrid } from '../components/ProviderGrid';
+import { GpsAlertBanner } from '../components/GpsAlertBanner';
+import { AuthModal } from '../components/AuthModal';
+import { ClientDashboard } from '../components/ClientDashboard';
+import { RatingModal } from '../components/RatingModal';
+import { SupportModal } from '../components/SupportModal';
+import { Footer } from '../components/Footer';
+
+import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
+import { useProviders } from '../hooks/useProviders';
+import { UserProfile, Proveedor, TicketSoporte } from '../types/database.types';
+
+export const Home: React.FC = () => {
+  const { provincias, categories, zones, loading: loadingCatZone } = useCategoriesAndZones();
+  
+  const [selectedProvincia, setSelectedProvincia] = useState<string>('');
+  const [selectedZone, setSelectedZone] = useState<string>('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Modals & State
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [ratingTarget, setRatingTarget] = useState<Proveedor | null>(null);
+
+  // User activity history & support tickets
+  const [contactedProviders, setContactedProviders] = useState<Proveedor[]>([]);
+  const [tickets, setTickets] = useState<TicketSoporte[]>([]);
+
+  const { providers, loading: loadingProviders } = useProviders({
+    provinciaId: selectedProvincia,
+    zoneId: selectedZone,
+    categoryId: selectedCategory,
+    searchQuery: searchQuery,
+  });
+
+  const handleResetFilters = () => {
+    setSelectedProvincia('');
+    setSelectedZone('');
+    setSelectedCategory('');
+    setSearchQuery('');
+  };
+
+  const handleContactProvider = (provider: Proveedor) => {
+    setContactedProviders((prev) => {
+      if (prev.find((p) => p.id === provider.id)) return prev;
+      return [provider, ...prev];
+    });
+  };
+
+  const handleTicketCreated = (newTicket: TicketSoporte) => {
+    setTickets((prev) => [newTicket, ...prev]);
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+      
+      {/* Navbar with Auth & Support Controls */}
+      <Navbar
+        user={user}
+        onOpenAuth={() => setIsAuthOpen(true)}
+        onOpenDashboard={() => setIsDashboardOpen(true)}
+        onOpenSupport={() => setIsSupportOpen(true)}
+      />
+
+      {/* Hero Header */}
+      <Hero totalProviders={providers.length} />
+
+      {/* GPS Geolocation Live Alert Banner */}
+      <GpsAlertBanner />
+
+      {/* Main Content Layout */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-grow py-4">
+        
+        {/* Mobile View Top Filters */}
+        <div className="block lg:hidden">
+          <SearchBar
+            provincias={provincias}
+            categories={categories}
+            zones={zones}
+            selectedProvincia={selectedProvincia}
+            selectedZone={selectedZone}
+            selectedCategory={selectedCategory}
+            searchQuery={searchQuery}
+            onSelectProvincia={setSelectedProvincia}
+            onSelectZone={setSelectedZone}
+            onSelectCategory={setSelectedCategory}
+            onSearchChange={setSearchQuery}
+            onResetFilters={handleResetFilters}
+          />
+        </div>
+
+        {/* Desktop View Layout (Sticky Sidebar + Results Grid) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Desktop Left Sticky Sidebar Filter */}
+          <div className="hidden lg:block lg:col-span-3">
+            <SearchBar
+              provincias={provincias}
+              categories={categories}
+              zones={zones}
+              selectedProvincia={selectedProvincia}
+              selectedZone={selectedZone}
+              selectedCategory={selectedCategory}
+              searchQuery={searchQuery}
+              onSelectProvincia={setSelectedProvincia}
+              onSelectZone={setSelectedZone}
+              onSelectCategory={setSelectedCategory}
+              onSearchChange={setSearchQuery}
+              onResetFilters={handleResetFilters}
+              isSidebarDesktop
+            />
+          </div>
+
+          {/* Provider Results Grid */}
+          <div className="col-span-1 lg:col-span-9">
+            <ProviderGrid
+              providers={providers}
+              loading={loadingProviders || loadingCatZone}
+              onResetFilters={handleResetFilters}
+              onContactClick={handleContactProvider}
+              onRatingClick={(p) => setRatingTarget(p)}
+            />
+          </div>
+
+        </div>
+      </div>
+
+      {/* Modals */}
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+        onLoginSuccess={(loggedUser) => setUser(loggedUser)}
+      />
+
+      <ClientDashboard
+        isOpen={isDashboardOpen}
+        onClose={() => setIsDashboardOpen(false)}
+        user={user}
+        onLogout={() => setUser(null)}
+        tickets={tickets}
+        onOpenCreateTicket={() => {
+          setIsDashboardOpen(false);
+          setIsSupportOpen(true);
+        }}
+        onOpenRating={(p) => setRatingTarget(p)}
+        contactedProviders={contactedProviders}
+      />
+
+      <RatingModal
+        isOpen={Boolean(ratingTarget)}
+        onClose={() => setRatingTarget(null)}
+        provider={ratingTarget}
+        userEmail={user?.email}
+      />
+
+      <SupportModal
+        isOpen={isSupportOpen}
+        onClose={() => setIsSupportOpen(false)}
+        userEmail={user?.email || 'invitado@gmail.com'}
+        onTicketCreated={handleTicketCreated}
+      />
+
+      {/* Footer */}
+      <Footer />
+
+    </div>
+  );
+};
