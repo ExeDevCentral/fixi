@@ -67,3 +67,15 @@ export interface UserProfile {
   nombre: string;
   foto?: string;
 }
+
+export interface Mensaje {
+  id: string;
+  emisor_email: string;
+  receptor_email: string;
+  proveedor_id?: string;
+  contenido: string;
+  leido?: boolean;
+  created_at: string;
+  proveedor?: Proveedor;
+}
+

@@ -7,12 +7,14 @@ interface ProviderCardProps {
   provider: Proveedor;
   onContactClick?: (provider: Proveedor) => void;
   onRatingClick?: (provider: Proveedor) => void;
+  onOpenChat?: (provider: Proveedor) => void;
 }
 
 export const ProviderCard: React.FC<ProviderCardProps> = ({
   provider,
   onContactClick,
   onRatingClick,
+  onOpenChat,
 }) => {
   const rawPhone = provider.telefono.replace(/\D/g, '');
   const encodedMsg = encodeURIComponent(`Hola, te encontré en Fixi`);
@@ -107,19 +109,28 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
         </div>
       </div>
 
-      {/* Card Action Button */}
-      <div className="p-5 pt-0 mt-auto">
+      {/* Card Action Buttons */}
+      <div className="p-5 pt-0 mt-auto space-y-2">
         <a
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
           onClick={handleWhatsAppClick}
-          className="w-full min-h-[50px] py-3.5 px-4 rounded-xl sm:rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-sm sm:text-base flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-98 transition-all btn-whatsapp-glow"
+          className="w-full min-h-[44px] py-3 px-4 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-98 transition-all btn-whatsapp-glow"
         >
-          <MessageCircle className="w-5 h-5 fill-slate-950 stroke-none" />
+          <MessageCircle className="w-4 h-4 fill-slate-950 stroke-none" />
           <span>Contactar por WhatsApp</span>
-          <ExternalLink className="w-4 h-4 opacity-70 ml-0.5" />
+          <ExternalLink className="w-3.5 h-3.5 opacity-70 ml-0.5" />
         </a>
+
+        {onOpenChat && (
+          <button
+            onClick={() => onOpenChat(provider)}
+            className="w-full py-2.5 px-4 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-all"
+          >
+            <span>Mensaje Interno en Fixi</span>
+          </button>
+        )}
       </div>
     </motion.article>
   );

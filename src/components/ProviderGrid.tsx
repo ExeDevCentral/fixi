@@ -9,6 +9,7 @@ interface ProviderGridProps {
   onResetFilters: () => void;
   onContactClick?: (provider: Proveedor) => void;
   onRatingClick?: (provider: Proveedor) => void;
+  onOpenChat?: (provider: Proveedor) => void;
 }
 
 export const ProviderGrid: React.FC<ProviderGridProps> = ({
@@ -17,6 +18,7 @@ export const ProviderGrid: React.FC<ProviderGridProps> = ({
   onResetFilters,
   onContactClick,
   onRatingClick,
+  onOpenChat,
 }) => {
   if (loading) {
     return (
@@ -80,6 +82,7 @@ export const ProviderGrid: React.FC<ProviderGridProps> = ({
             provider={provider}
             onContactClick={onContactClick}
             onRatingClick={onRatingClick}
+            onOpenChat={onOpenChat}
           />
         ))}
       </div>

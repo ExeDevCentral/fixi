@@ -85,6 +85,17 @@ create table if not exists tickets_soporte (
   created_at timestamptz default now()
 );
 
+-- Mensajería Interna Entre Usuarios y Proveedores
+create table if not exists mensajes (
+  id uuid primary key default gen_random_uuid(),
+  emisor_email text not null,
+  receptor_email text not null,
+  proveedor_id uuid references proveedores(id) on delete set null,
+  contenido text not null,
+  leido boolean default false,
+  created_at timestamptz default now()
+);
+
 -- RLS Security
 alter table provincias enable row level security;
 alter table zonas enable row level security;
@@ -92,6 +103,7 @@ alter table categorias enable row level security;
 alter table proveedores enable row level security;
 alter table resenas enable row level security;
 alter table tickets_soporte enable row level security;
+alter table mensajes enable row level security;
 
 create policy "Lectura pública de servicios" on proveedores for select using (activo = true);
 create policy "Registro público de proveedores" on proveedores for insert with check (true);
@@ -99,4 +111,7 @@ create policy "Lectura pública de reseñas" on resenas for select using (true);
 create policy "Creación pública de reseñas" on resenas for insert with check (true);
 create policy "Creación pública de tickets" on tickets_soporte for insert with check (true);
 create policy "Lectura pública de tickets propios" on tickets_soporte for select using (true);
+create policy "Acceso público a mensajes propios" on mensajes for select using (true);
+create policy "Envío público de mensajes" on mensajes for insert with check (true);
+
 

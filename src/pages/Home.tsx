@@ -8,11 +8,13 @@ import { AuthModal } from '../components/AuthModal';
 import { ClientDashboard } from '../components/ClientDashboard';
 import { RatingModal } from '../components/RatingModal';
 import { SupportModal } from '../components/SupportModal';
+import { ChatModal } from '../components/ChatModal';
 import { Footer } from '../components/Footer';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
 import { useProviders } from '../hooks/useProviders';
-import { UserProfile, Proveedor, TicketSoporte } from '../types/database.types';
+import { UserProfile, Proveedor, TicketSoporte, Mensaje } from '../types/database.types';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export const Home: React.FC = () => {
   const { provincias, categories, zones, loading: loadingCatZone } = useCategoriesAndZones();
@@ -28,10 +30,12 @@ export const Home: React.FC = () => {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<Proveedor | null>(null);
+  const [chatTarget, setChatTarget] = useState<Proveedor | null>(null);
 
-  // User activity history & support tickets
+  // User activity history, messages & support tickets
   const [contactedProviders, setContactedProviders] = useState<Proveedor[]>([]);
   const [tickets, setTickets] = useState<TicketSoporte[]>([]);
+  const [messages, setMessages] = useState<Mensaje[]>([]);
 
   const { providers, loading: loadingProviders } = useProviders({
     provinciaId: selectedProvincia,
@@ -52,6 +56,50 @@ export const Home: React.FC = () => {
       if (prev.find((p) => p.id === provider.id)) return prev;
       return [provider, ...prev];
     });
+  };
+
+  const handleOpenChat = (provider: Proveedor) => {
+    if (!user) {
+      setIsAuthOpen(true);
+      return;
+    }
+    setChatTarget(provider);
+  };
+
+  const handleMessageSent = (newMsg: Mensaje) => {
+    setMessages((prev) => [...prev, newMsg]);
+  };
+
+  const handleSendMessageReply = async (receptorEmail: string, contenido: string, proveedorId?: string) => {
+    if (!user) return;
+
+    const payload = {
+      emisor_email: user.email,
+      receptor_email: receptorEmail,
+      proveedor_id: proveedorId,
+      contenido,
+      leido: false,
+    };
+
+    let newMsg: Mensaje;
+
+    if (isSupabaseConfigured && supabase) {
+      const { data, error } = await supabase
+        .from('mensajes')
+        .insert([payload])
+        .select()
+        .single();
+      if (error) throw error;
+      newMsg = data as Mensaje;
+    } else {
+      newMsg = {
+        id: `msg-${Date.now()}`,
+        ...payload,
+        created_at: new Date().toISOString(),
+      };
+    }
+
+    setMessages((prev) => [...prev, newMsg]);
   };
 
   const handleTicketCreated = (newTicket: TicketSoporte) => {
@@ -126,6 +174,7 @@ export const Home: React.FC = () => {
               onResetFilters={handleResetFilters}
               onContactClick={handleContactProvider}
               onRatingClick={(p) => setRatingTarget(p)}
+              onOpenChat={handleOpenChat}
             />
           </div>
 
@@ -145,12 +194,22 @@ export const Home: React.FC = () => {
         user={user}
         onLogout={() => setUser(null)}
         tickets={tickets}
+        messages={messages}
+        onSendMessage={handleSendMessageReply}
         onOpenCreateTicket={() => {
           setIsDashboardOpen(false);
           setIsSupportOpen(true);
         }}
         onOpenRating={(p) => setRatingTarget(p)}
         contactedProviders={contactedProviders}
+      />
+
+      <ChatModal
+        isOpen={Boolean(chatTarget)}
+        onClose={() => setChatTarget(null)}
+        provider={chatTarget}
+        currentUser={user}
+        onMessageSent={handleMessageSent}
       />
 
       <RatingModal
