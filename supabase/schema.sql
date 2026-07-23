@@ -96,6 +96,22 @@ create table if not exists mensajes (
   created_at timestamptz default now()
 );
 
+-- Solicitudes de Trabajo / Bolsa de Trabajos para Alertas a Trabajadores
+create table if not exists solicitudes_trabajo (
+  id uuid primary key default gen_random_uuid(),
+  cliente_nombre text not null,
+  cliente_email text not null,
+  cliente_telefono text not null,
+  categoria_id uuid references categorias(id) on delete cascade,
+  zona_id uuid references zonas(id) on delete cascade,
+  titulo text not null,
+  descripcion text not null,
+  presupuesto_estimado text,
+  urgencia text default 'Normal', -- 'Urgente 24hs', 'Esta Semana', 'Programado', 'Normal'
+  estado text default 'Abierta', -- 'Abierta', 'En Proceso', 'Cerrada'
+  created_at timestamptz default now()
+);
+
 -- RLS Security
 alter table provincias enable row level security;
 alter table zonas enable row level security;
@@ -104,6 +120,7 @@ alter table proveedores enable row level security;
 alter table resenas enable row level security;
 alter table tickets_soporte enable row level security;
 alter table mensajes enable row level security;
+alter table solicitudes_trabajo enable row level security;
 
 create policy "Lectura pública de servicios" on proveedores for select using (activo = true);
 create policy "Registro público de proveedores" on proveedores for insert with check (true);
@@ -113,5 +130,8 @@ create policy "Creación pública de tickets" on tickets_soporte for insert with
 create policy "Lectura pública de tickets propios" on tickets_soporte for select using (true);
 create policy "Acceso público a mensajes propios" on mensajes for select using (true);
 create policy "Envío público de mensajes" on mensajes for insert with check (true);
+create policy "Lectura pública de solicitudes de trabajo" on solicitudes_trabajo for select using (true);
+create policy "Publicación pública de solicitudes de trabajo" on solicitudes_trabajo for insert with check (true);
+
 
 

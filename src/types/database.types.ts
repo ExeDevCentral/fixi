@@ -79,3 +79,21 @@ export interface Mensaje {
   proveedor?: Proveedor;
 }
 
+export interface SolicitudTrabajo {
+  id: string;
+  cliente_nombre: string;
+  cliente_email: string;
+  cliente_telefono: string;
+  categoria_id: string;
+  zona_id: string;
+  titulo: string;
+  descripcion: string;
+  presupuesto_estimado?: string;
+  urgencia: 'Urgente 24hs' | 'Esta Semana' | 'Programado' | 'Normal';
+  estado: 'Abierta' | 'En Proceso' | 'Cerrada';
+  created_at: string;
+  categoria?: Categoria;
+  zona?: Zona;
+}
+
+

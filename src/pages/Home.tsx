@@ -1,19 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { SearchBar } from '../components/SearchBar';
 import { ProviderGrid } from '../components/ProviderGrid';
+import { JobBoard } from '../components/JobBoard';
 import { GpsAlertBanner } from '../components/GpsAlertBanner';
 import { AuthModal } from '../components/AuthModal';
 import { ClientDashboard } from '../components/ClientDashboard';
 import { RatingModal } from '../components/RatingModal';
 import { SupportModal } from '../components/SupportModal';
 import { ChatModal } from '../components/ChatModal';
+import { RequestJobModal } from '../components/RequestJobModal';
 import { Footer } from '../components/Footer';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
 import { useProviders } from '../hooks/useProviders';
-import { UserProfile, Proveedor, TicketSoporte, Mensaje } from '../types/database.types';
+import { UserProfile, Proveedor, TicketSoporte, Mensaje, SolicitudTrabajo } from '../types/database.types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export const Home: React.FC = () => {
@@ -29,13 +31,48 @@ export const Home: React.FC = () => {
   const [isAuthOpen, setIsAuthOpen] = useState(false);
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isRequestJobOpen, setIsRequestJobOpen] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<Proveedor | null>(null);
   const [chatTarget, setChatTarget] = useState<Proveedor | null>(null);
 
-  // User activity history, messages & support tickets
+  // User activity history, messages, job requests & support tickets
   const [contactedProviders, setContactedProviders] = useState<Proveedor[]>([]);
   const [tickets, setTickets] = useState<TicketSoporte[]>([]);
   const [messages, setMessages] = useState<Mensaje[]>([]);
+  const [solicitudes, setSolicitudes] = useState<SolicitudTrabajo[]>([
+    {
+      id: 'mock-sol-1',
+      cliente_nombre: 'Mariana Gomez',
+      cliente_email: 'mariana@ejemplo.com',
+      cliente_telefono: '3415998877',
+      categoria_id: 'cat-3',
+      zona_id: 'zona-1',
+      titulo: 'Instalación de tablero eléctrico monofásico y disyuntor',
+      descripcion: 'Necesito electricista matriculado para adaptar tablero principal en depto centro de Rosario. Trabajo simple.',
+      presupuesto_estimado: '$55.000',
+      urgencia: 'Urgente 24hs',
+      estado: 'Abierta',
+      created_at: new Date().toISOString(),
+      categoria: { id: 'cat-3', nombre: 'Electricidad', slug: 'electricidad' },
+      zona: { id: 'zona-1', nombre: 'Rosario (Centro)', slug: 'rosario-centro', provincia_id: 'prov-1' },
+    },
+    {
+      id: 'mock-sol-2',
+      cliente_nombre: 'Santiago Rossi',
+      cliente_email: 'santiago@ejemplo.com',
+      cliente_telefono: '3414123890',
+      categoria_id: 'cat-1',
+      zona_id: 'zona-4',
+      titulo: 'Mantenimiento de parque y poda de cerco vivo en Funes',
+      descripcion: 'Buscamos jardinero para cortar césped y nivelar cerco de ligustrina de 25 metros en Funes.',
+      presupuesto_estimado: '$40.000',
+      urgencia: 'Esta Semana',
+      estado: 'Abierta',
+      created_at: new Date().toISOString(),
+      categoria: { id: 'cat-1', nombre: 'Jardinería', slug: 'jardineria' },
+      zona: { id: 'zona-4', nombre: 'Funes', slug: 'funes', provincia_id: 'prov-1' },
+    }
+  ]);
 
   const { providers, loading: loadingProviders } = useProviders({
     provinciaId: selectedProvincia,
@@ -43,6 +80,28 @@ export const Home: React.FC = () => {
     categoryId: selectedCategory,
     searchQuery: searchQuery,
   });
+
+  // Fetch live requests from Supabase if configured
+  useEffect(() => {
+    async function fetchRequests() {
+      if (isSupabaseConfigured && supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('solicitudes_trabajo')
+            .select(`*, categoria:categorias(*), zona:zonas(*)`)
+            .eq('estado', 'Abierta')
+            .order('created_at', { ascending: false });
+
+          if (!error && data && data.length > 0) {
+            setSolicitudes(data as SolicitudTrabajo[]);
+          }
+        } catch (err) {
+          console.warn('Fallback a solicitudes mock:', err);
+        }
+      }
+    }
+    fetchRequests();
+  }, []);
 
   const handleResetFilters = () => {
     setSelectedProvincia('');
@@ -106,6 +165,10 @@ export const Home: React.FC = () => {
     setTickets((prev) => [newTicket, ...prev]);
   };
 
+  const handleRequestCreated = (newReq: SolicitudTrabajo) => {
+    setSolicitudes((prev) => [newReq, ...prev]);
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
       
@@ -115,6 +178,7 @@ export const Home: React.FC = () => {
         onOpenAuth={() => setIsAuthOpen(true)}
         onOpenDashboard={() => setIsDashboardOpen(true)}
         onOpenSupport={() => setIsSupportOpen(true)}
+        onOpenRequestJob={() => setIsRequestJobOpen(true)}
       />
 
       {/* Hero Header */}
@@ -166,8 +230,8 @@ export const Home: React.FC = () => {
             />
           </div>
 
-          {/* Provider Results Grid */}
-          <div className="col-span-1 lg:col-span-9">
+          {/* Provider Results Grid & Job Board */}
+          <div className="col-span-1 lg:col-span-9 space-y-8">
             <ProviderGrid
               providers={providers}
               loading={loadingProviders || loadingCatZone}
@@ -175,6 +239,12 @@ export const Home: React.FC = () => {
               onContactClick={handleContactProvider}
               onRatingClick={(p) => setRatingTarget(p)}
               onOpenChat={handleOpenChat}
+            />
+
+            {/* Public Job Request Board */}
+            <JobBoard
+              solicitudes={solicitudes}
+              onOpenCreateRequest={() => setIsRequestJobOpen(true)}
             />
           </div>
 
@@ -210,6 +280,16 @@ export const Home: React.FC = () => {
         provider={chatTarget}
         currentUser={user}
         onMessageSent={handleMessageSent}
+      />
+
+      <RequestJobModal
+        isOpen={isRequestJobOpen}
+        onClose={() => setIsRequestJobOpen(false)}
+        categories={categories}
+        zones={zones}
+        userEmail={user?.email}
+        userName={user?.nombre}
+        onRequestCreated={handleRequestCreated}
       />
 
       <RatingModal

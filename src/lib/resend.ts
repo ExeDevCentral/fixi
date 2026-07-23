@@ -116,3 +116,36 @@ export async function sendNewMessageNotificationEmail(msgData: {
     html,
   });
 }
+
+export async function sendJobAlertBroadcastEmail(jobData: {
+  to: string;
+  titulo: string;
+  descripcion: string;
+  categoria?: string;
+  zona?: string;
+  urgencia?: string;
+  presupuesto?: string;
+}) {
+  const html = `
+    <div style="font-family: Arial, sans-serif; background-color: #0f172a; color: #f8fafc; padding: 24px; border-radius: 16px;">
+      <h2 style="color: #f59e0b; margin-bottom: 8px;">🚨 ALERTA DE TRABAJO EN TU ZONA</h2>
+      <p>Un cliente ha publicado una nueva necesidad de servicio en tu rubro:</p>
+      <div style="background-color: #1e293b; padding: 16px; border-radius: 12px; margin: 16px 0; border-left: 4px solid #f59e0b;">
+        <h3 style="color: #ffffff; margin: 0 0 8px 0;">${jobData.titulo}</h3>
+        <p style="margin: 4px 0; font-size: 14px;"><strong>Categoría:</strong> ${jobData.categoria || 'Servicios'}</p>
+        <p style="margin: 4px 0; font-size: 14px;"><strong>Zona:</strong> ${jobData.zona || 'Rosario'}</p>
+        <p style="margin: 4px 0; font-size: 14px;"><strong>Urgencia:</strong> ${jobData.urgencia || 'Normal'}</p>
+        ${jobData.presupuesto ? `<p style="margin: 4px 0; font-size: 14px;"><strong>Presupuesto est.:</strong> ${jobData.presupuesto}</p>` : ''}
+        <p style="margin: 12px 0 0 0; color: #cbd5e1; font-style: italic;">"${jobData.descripcion}"</p>
+      </div>
+      <p>Ingresá a Fixi Marketplace para postularte y contactar al cliente inmediatamente.</p>
+    </div>
+  `;
+
+  return sendResendEmail({
+    to: jobData.to,
+    subject: `🚨 ALERTA TRABAJO: ${jobData.titulo} (${jobData.zona || 'Tu Zona'})`,
+    html,
+  });
+}
+

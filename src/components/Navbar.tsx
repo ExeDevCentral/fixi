@@ -8,6 +8,7 @@ interface NavbarProps {
   onOpenAuth: () => void;
   onOpenDashboard: () => void;
   onOpenSupport: () => void;
+  onOpenRequestJob?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -15,6 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuth,
   onOpenDashboard,
   onOpenSupport,
+  onOpenRequestJob,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#090d16]/90 backdrop-blur-md">
@@ -41,8 +43,18 @@ export const Navbar: React.FC<NavbarProps> = ({
         </motion.div>
 
         {/* User Auth & Support Navigation */}
-        <div className="flex items-center gap-2.5 sm:gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           
+          {onOpenRequestJob && (
+            <button
+              onClick={onOpenRequestJob}
+              className="px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-xs font-bold transition-all flex items-center gap-1.5"
+            >
+              <span className="hidden sm:inline">Pedir Presupuesto</span>
+              <span className="sm:hidden">Pedir</span>
+            </button>
+          )}
+
           <button
             onClick={onOpenSupport}
             className="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800 text-xs font-semibold flex items-center gap-1.5 transition-colors"
