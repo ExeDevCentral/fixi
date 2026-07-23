@@ -37,8 +37,34 @@ create table if not exists proveedores (
   activo boolean default true,
   latitud numeric(10, 6),
   longitud numeric(10, 6),
+  -- Campos de Cumplimiento Legal y Privacidad (Backup Interno)
+  dni text,
+  email text,
+  acepto_terminos boolean default false,
+  fecha_aceptacion_terminos timestamptz,
   created_at timestamptz default now()
 );
+
+-- Vista pública segura que excluye DNI y Email
+create or replace view proveedores_publicos as
+select 
+  id,
+  nombre,
+  categoria_id,
+  zona_id,
+  telefono,
+  descripcion,
+  foto_url,
+  destacado,
+  verificado,
+  activo,
+  latitud,
+  longitud,
+  created_at
+from proveedores
+where activo = true;
+
+grant select on proveedores_publicos to anon, authenticated;
 
 create table if not exists resenas (
   id uuid primary key default gen_random_uuid(),
@@ -68,7 +94,9 @@ alter table resenas enable row level security;
 alter table tickets_soporte enable row level security;
 
 create policy "Lectura pública de servicios" on proveedores for select using (activo = true);
+create policy "Registro público de proveedores" on proveedores for insert with check (true);
 create policy "Lectura pública de reseñas" on resenas for select using (true);
 create policy "Creación pública de reseñas" on resenas for insert with check (true);
 create policy "Creación pública de tickets" on tickets_soporte for insert with check (true);
 create policy "Lectura pública de tickets propios" on tickets_soporte for select using (true);
+

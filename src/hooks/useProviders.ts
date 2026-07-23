@@ -56,13 +56,12 @@ export function useProviders(filters: ProviderFilters) {
 
       try {
         let query = supabase
-          .from('proveedores')
+          .from('proveedores_publicos')
           .select(`
             *,
             categoria:categorias(*),
             zona:zonas(*, provincia:provincias(*))
-          `)
-          .eq('activo', true);
+          `);
 
         if (zoneId) {
           query = query.eq('zona_id', zoneId);
