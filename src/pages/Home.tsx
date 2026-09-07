@@ -11,6 +11,7 @@ import { RatingModal } from '../components/RatingModal';
 import { SupportModal } from '../components/SupportModal';
 import { ChatModal } from '../components/ChatModal';
 import { RequestJobModal } from '../components/RequestJobModal';
+import { AddProviderModal } from '../components/AddProviderModal';
 import { Footer } from '../components/Footer';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
@@ -32,6 +33,7 @@ export const Home: React.FC = () => {
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
   const [isSupportOpen, setIsSupportOpen] = useState(false);
   const [isRequestJobOpen, setIsRequestJobOpen] = useState(false);
+  const [isAddProviderOpen, setIsAddProviderOpen] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<Proveedor | null>(null);
   const [chatTarget, setChatTarget] = useState<Proveedor | null>(null);
 
@@ -170,7 +172,7 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen flex flex-col bg-[#060911] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
       
       {/* Navbar with Auth & Support Controls */}
       <Navbar
@@ -179,10 +181,15 @@ export const Home: React.FC = () => {
         onOpenDashboard={() => setIsDashboardOpen(true)}
         onOpenSupport={() => setIsSupportOpen(true)}
         onOpenRequestJob={() => setIsRequestJobOpen(true)}
+        onOpenAddProvider={() => setIsAddProviderOpen(true)}
       />
 
       {/* Hero Header */}
-      <Hero totalProviders={providers.length} />
+      <Hero
+        totalProviders={providers.length}
+        onOpenRequestJob={() => setIsRequestJobOpen(true)}
+        onOpenAddProvider={() => setIsAddProviderOpen(true)}
+      />
 
       {/* GPS Geolocation Live Alert Banner */}
       <GpsAlertBanner />
@@ -290,6 +297,16 @@ export const Home: React.FC = () => {
         userEmail={user?.email}
         userName={user?.nombre}
         onRequestCreated={handleRequestCreated}
+      />
+
+      <AddProviderModal
+        isOpen={isAddProviderOpen}
+        onClose={() => setIsAddProviderOpen(false)}
+        categories={categories}
+        zones={zones}
+        onProviderAdded={(newProvider) => {
+          // Handled gracefully via state / refetch
+        }}
       />
 
       <RatingModal

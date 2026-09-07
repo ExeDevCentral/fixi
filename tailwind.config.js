@@ -29,6 +29,8 @@ export default {
         'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'float': 'float 6s ease-in-out infinite',
         'glow': 'glow 2s ease-in-out infinite alternate',
+        'signature-shimmer': 'signatureShimmer 2.5s ease-in-out infinite',
+        'signature-glow': 'signatureGlow 3s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -38,7 +40,15 @@ export default {
         glow: {
           '0%': { opacity: '0.4', filter: 'drop-shadow(0 0 15px rgba(34, 197, 94, 0.3))' },
           '100%': { opacity: '0.9', filter: 'drop-shadow(0 0 25px rgba(34, 197, 94, 0.7))' },
-        }
+        },
+        signatureShimmer: {
+          '0%, 100%': { backgroundPosition: '-200% 0' },
+          '50%': { backgroundPosition: '200% 0' },
+        },
+        signatureGlow: {
+          '0%, 100%': { opacity: '0.4' },
+          '50%': { opacity: '0.8' },
+        },
       }
     },
   },

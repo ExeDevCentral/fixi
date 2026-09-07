@@ -4,18 +4,28 @@
 
 @layer base {
   body {
-    background-color: #090d16;
-    color: #f1f5f9;
-    font-family: 'Outfit', 'Inter', sans-serif;
+    background-color: #060911;
+    color: #f8fafc;
+    font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 }
 
-/* Glassmorphic elements */
+/* Custom Glassmorphism for Web App Interface */
+.glass-panel {
+  background: rgba(13, 19, 35, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .glass-card {
-  background: rgba(18, 24, 38, 0.7);
+  background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 
 .glass-card-hover {
@@ -23,14 +33,14 @@
 }
 
 .glass-card-hover:hover {
-  background: rgba(24, 32, 50, 0.85);
-  border-color: rgba(34, 197, 94, 0.3);
+  background: rgba(20, 30, 52, 0.85);
+  border-color: rgba(52, 211, 153, 0.35);
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5), 0 0 20px 0 rgba(34, 197, 94, 0.15);
+  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6), 0 0 25px 0 rgba(52, 211, 153, 0.15);
 }
 
 .glass-input {
-  background: rgba(15, 23, 42, 0.8);
+  background: rgba(11, 17, 31, 0.85);
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: #fff;
@@ -38,13 +48,13 @@
 
 .glass-input:focus {
   outline: none;
-  border-color: #22c55e;
-  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+  border-color: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
 }
 
-/* Custom Gradients */
+/* Custom Web App Gradients & Text Glows */
 .text-gradient {
-  background: linear-gradient(135deg, #ffffff 0%, #a7f3d0 50%, #22c55e 100%);
+  background: linear-gradient(135deg, #ffffff 0%, #6ee7b7 50%, #10b981 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -55,31 +65,57 @@
   -webkit-text-fill-color: transparent;
 }
 
-.bg-hero-glow {
-  background: radial-gradient(circle at 50% 30%, rgba(34, 197, 94, 0.15) 0%, rgba(15, 23, 42, 0) 70%);
+.bg-app-glow {
+  background: radial-gradient(circle at 50% 20%, rgba(16, 185, 129, 0.12) 0%, rgba(6, 9, 17, 0) 70%);
 }
 
 .btn-whatsapp-glow {
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.4);
   transition: all 0.25s ease;
 }
 
 .btn-whatsapp-glow:hover {
-  box-shadow: 0 0 25px rgba(34, 197, 94, 0.7);
+  box-shadow: 0 0 25px rgba(16, 185, 129, 0.7);
   transform: scale(1.02);
+}
+
+/* Pulse status dot */
+.status-dot-live {
+  width: 8px;
+  height: 8px;
+  background-color: #10b981;
+  border-radius: 50%;
+  box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  animation: statusPulse 2s infinite;
+}
+
+@keyframes statusPulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
 }
 
 /* Custom scrollbars */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #060911;
 }
 ::-webkit-scrollbar-thumb {
   background: #1e293b;
-  border-radius: 4px;
+  border-radius: 999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #22c55e;
+  background: #10b981;
 }

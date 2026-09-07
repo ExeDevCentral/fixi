@@ -1,5 +1,6 @@
 import React from 'react';
 import { Wrench } from 'lucide-react';
+import { CraftedBySignature } from './shared/CraftedBySignature';
 
 export const Footer: React.FC = () => {
   return (
@@ -12,7 +13,7 @@ export const Footer: React.FC = () => {
             <Wrench className="w-4 h-4 text-slate-950 stroke-[2.5]" />
           </div>
           <div>
-            <span className="text-base font-black tracking-tight text-white font-sans">CHAMBEA</span>
+            <span className="text-base font-black tracking-tight text-white font-sans">FIXI</span>
             <p className="text-xs text-slate-400">Marketplace de servicios locales en Rosario, Funes y Roldán.</p>
           </div>
         </div>
@@ -27,6 +28,11 @@ export const Footer: React.FC = () => {
           <a href="#top" className="hover:text-emerald-400 transition-colors">Volver arriba ↑</a>
         </div>
 
+      </div>
+
+      {/* ExePaginasWeb Signature */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <CraftedBySignature variant="dark" showBar className="mt-10" />
       </div>
     </footer>
   );
