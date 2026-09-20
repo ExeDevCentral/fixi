@@ -22,15 +22,15 @@ export const MOCK_PROVINCIAS: Provincia[] = [
 ];
 
 export const MOCK_ZONAS: Zona[] = [
-  { id: 'zona-1', nombre: 'Rosario (Centro)', slug: 'rosario-centro', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-2', nombre: 'Rosario (Alberdi / Norte)', slug: 'rosario-norte', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-3', nombre: 'Rosario (Fisherton)', slug: 'rosario-fisherton', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-4', nombre: 'Funes', slug: 'funes', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-5', nombre: 'Roldán', slug: 'roldan', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-6', nombre: 'Granadero Baigorria', slug: 'granadero-baigorria', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0] },
-  { id: 'zona-7', nombre: 'San Nicolás de los Arroyos', slug: 'san-nicolas', provincia_id: 'prov-2', provincia: MOCK_PROVINCIAS[1] },
-  { id: 'zona-8', nombre: 'Pergamino', slug: 'pergamino', provincia_id: 'prov-2', provincia: MOCK_PROVINCIAS[1] },
-  { id: 'zona-9', nombre: 'Córdoba Capital', slug: 'cordoba-capital', provincia_id: 'prov-3', provincia: MOCK_PROVINCIAS[2] },
+  { id: 'zona-1', nombre: 'Rosario (Centro)', slug: 'rosario-centro', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -32.94682, longitud: -60.63932 },
+  { id: 'zona-2', nombre: 'Rosario (Alberdi / Norte)', slug: 'rosario-norte', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -32.895, longitud: -60.655 },
+  { id: 'zona-3', nombre: 'Rosario (Fisherton)', slug: 'rosario-fisherton', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -32.9333, longitud: -60.7 },
+  { id: 'zona-4', nombre: 'Funes', slug: 'funes', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -32.9167, longitud: -60.81 },
+  { id: 'zona-5', nombre: 'Roldán', slug: 'roldan', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -33.032, longitud: -60.9 },
+  { id: 'zona-6', nombre: 'Granadero Baigorria', slug: 'granadero-baigorria', provincia_id: 'prov-1', provincia: MOCK_PROVINCIAS[0], latitud: -32.85, longitud: -60.7167 },
+  { id: 'zona-7', nombre: 'San Nicolás de los Arroyos', slug: 'san-nicolas', provincia_id: 'prov-2', provincia: MOCK_PROVINCIAS[1], latitud: -33.3357, longitud: -60.2246 },
+  { id: 'zona-8', nombre: 'Pergamino', slug: 'pergamino', provincia_id: 'prov-2', provincia: MOCK_PROVINCIAS[1], latitud: -33.8935, longitud: -60.5788 },
+  { id: 'zona-9', nombre: 'Córdoba Capital', slug: 'cordoba-capital', provincia_id: 'prov-3', provincia: MOCK_PROVINCIAS[2], latitud: -31.4201, longitud: -64.1888 },
 ];
 
 export const MOCK_CATEGORIAS: Categoria[] = [

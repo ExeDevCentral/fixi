@@ -1,17 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Navbar } from '../components/Navbar';
 import { Hero } from '../components/Hero';
 import { SearchBar } from '../components/SearchBar';
 import { ProviderGrid } from '../components/ProviderGrid';
 import { JobBoard } from '../components/JobBoard';
 import { GpsAlertBanner } from '../components/GpsAlertBanner';
-import { AuthModal } from '../components/AuthModal';
-import { ClientDashboard } from '../components/ClientDashboard';
-import { RatingModal } from '../components/RatingModal';
-import { SupportModal } from '../components/SupportModal';
-import { ChatModal } from '../components/ChatModal';
-import { RequestJobModal } from '../components/RequestJobModal';
-import { AddProviderModal } from '../components/AddProviderModal';
 import { Footer } from '../components/Footer';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
@@ -19,13 +12,40 @@ import { useProviders } from '../hooks/useProviders';
 import { UserProfile, Proveedor, TicketSoporte, Mensaje, SolicitudTrabajo } from '../types/database.types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+const AuthModal = lazy(() =>
+  import('../components/AuthModal').then((m) => ({ default: m.AuthModal }))
+);
+const ClientDashboard = lazy(() =>
+  import('../components/ClientDashboard').then((m) => ({ default: m.ClientDashboard }))
+);
+const ChatModal = lazy(() =>
+  import('../components/ChatModal').then((m) => ({ default: m.ChatModal }))
+);
+const RequestJobModal = lazy(() =>
+  import('../components/RequestJobModal').then((m) => ({ default: m.RequestJobModal }))
+);
+const AddProviderModal = lazy(() =>
+  import('../components/AddProviderModal').then((m) => ({ default: m.AddProviderModal }))
+);
+const RatingModal = lazy(() =>
+  import('../components/RatingModal').then((m) => ({ default: m.RatingModal }))
+);
+const SupportModal = lazy(() =>
+  import('../components/SupportModal').then((m) => ({ default: m.SupportModal }))
+);
+
 export const Home: React.FC = () => {
   const { provincias, categories, zones, loading: loadingCatZone } = useCategoriesAndZones();
-  
+
   const [selectedProvincia, setSelectedProvincia] = useState<string>('');
   const [selectedZone, setSelectedZone] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [userLocation, setUserLocation] = useState<{
+    latitude: number;
+    longitude: number;
+  } | null>(null);
+  const [sortByDistance, setSortByDistance] = useState(false);
 
   // Modals & State
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -81,6 +101,9 @@ export const Home: React.FC = () => {
     zoneId: selectedZone,
     categoryId: selectedCategory,
     searchQuery: searchQuery,
+    userLatitude: userLocation?.latitude,
+    userLongitude: userLocation?.longitude,
+    sortByDistance,
   });
 
   // Fetch live requests from Supabase if configured
@@ -173,7 +196,7 @@ export const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#060911] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
-      
+
       {/* Navbar with Auth & Support Controls */}
       <Navbar
         user={user}
@@ -192,11 +215,15 @@ export const Home: React.FC = () => {
       />
 
       {/* GPS Geolocation Live Alert Banner */}
-      <GpsAlertBanner />
+      <GpsAlertBanner
+        onLocationDetected={(latitude, longitude) =>
+          setUserLocation({ latitude, longitude })
+        }
+      />
 
       {/* Main Content Layout */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-grow py-4">
-        
+
         {/* Mobile View Top Filters */}
         <div className="block lg:hidden">
           <SearchBar
@@ -217,7 +244,7 @@ export const Home: React.FC = () => {
 
         {/* Desktop View Layout (Sticky Sidebar + Results Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          
+
           {/* Desktop Left Sticky Sidebar Filter */}
           <div className="hidden lg:block lg:col-span-3">
             <SearchBar
@@ -246,6 +273,9 @@ export const Home: React.FC = () => {
               onContactClick={handleContactProvider}
               onRatingClick={(p) => setRatingTarget(p)}
               onOpenChat={handleOpenChat}
+              sortByDistance={sortByDistance}
+              canSortByDistance={Boolean(userLocation)}
+              onToggleSortByDistance={() => setSortByDistance((s) => !s)}
             />
 
             {/* Public Job Request Board */}
@@ -259,69 +289,71 @@ export const Home: React.FC = () => {
       </div>
 
       {/* Modals */}
-      <AuthModal
-        isOpen={isAuthOpen}
-        onClose={() => setIsAuthOpen(false)}
-        onLoginSuccess={(loggedUser) => setUser(loggedUser)}
-      />
+      <Suspense fallback={null}>
+        <AuthModal
+          isOpen={isAuthOpen}
+          onClose={() => setIsAuthOpen(false)}
+          onLoginSuccess={(loggedUser) => setUser(loggedUser)}
+        />
 
-      <ClientDashboard
-        isOpen={isDashboardOpen}
-        onClose={() => setIsDashboardOpen(false)}
-        user={user}
-        onLogout={() => setUser(null)}
-        tickets={tickets}
-        messages={messages}
-        onSendMessage={handleSendMessageReply}
-        onOpenCreateTicket={() => {
-          setIsDashboardOpen(false);
-          setIsSupportOpen(true);
-        }}
-        onOpenRating={(p) => setRatingTarget(p)}
-        contactedProviders={contactedProviders}
-      />
+        <ClientDashboard
+          isOpen={isDashboardOpen}
+          onClose={() => setIsDashboardOpen(false)}
+          user={user}
+          onLogout={() => setUser(null)}
+          tickets={tickets}
+          messages={messages}
+          onSendMessage={handleSendMessageReply}
+          onOpenCreateTicket={() => {
+            setIsDashboardOpen(false);
+            setIsSupportOpen(true);
+          }}
+          onOpenRating={(p) => setRatingTarget(p)}
+          contactedProviders={contactedProviders}
+        />
 
-      <ChatModal
-        isOpen={Boolean(chatTarget)}
-        onClose={() => setChatTarget(null)}
-        provider={chatTarget}
-        currentUser={user}
-        onMessageSent={handleMessageSent}
-      />
+        <ChatModal
+          isOpen={Boolean(chatTarget)}
+          onClose={() => setChatTarget(null)}
+          provider={chatTarget}
+          currentUser={user}
+          onMessageSent={handleMessageSent}
+        />
 
-      <RequestJobModal
-        isOpen={isRequestJobOpen}
-        onClose={() => setIsRequestJobOpen(false)}
-        categories={categories}
-        zones={zones}
-        userEmail={user?.email}
-        userName={user?.nombre}
-        onRequestCreated={handleRequestCreated}
-      />
+        <RequestJobModal
+          isOpen={isRequestJobOpen}
+          onClose={() => setIsRequestJobOpen(false)}
+          categories={categories}
+          zones={zones}
+          userEmail={user?.email}
+          userName={user?.nombre}
+          onRequestCreated={handleRequestCreated}
+        />
 
-      <AddProviderModal
-        isOpen={isAddProviderOpen}
-        onClose={() => setIsAddProviderOpen(false)}
-        categories={categories}
-        zones={zones}
-        onProviderAdded={(newProvider) => {
-          // Handled gracefully via state / refetch
-        }}
-      />
+        <AddProviderModal
+          isOpen={isAddProviderOpen}
+          onClose={() => setIsAddProviderOpen(false)}
+          categories={categories}
+          zones={zones}
+          onProviderAdded={(newProvider) => {
+            // Handled gracefully via state / refetch
+          }}
+        />
 
-      <RatingModal
-        isOpen={Boolean(ratingTarget)}
-        onClose={() => setRatingTarget(null)}
-        provider={ratingTarget}
-        userEmail={user?.email}
-      />
+        <RatingModal
+          isOpen={Boolean(ratingTarget)}
+          onClose={() => setRatingTarget(null)}
+          provider={ratingTarget}
+          userEmail={user?.email}
+        />
 
-      <SupportModal
-        isOpen={isSupportOpen}
-        onClose={() => setIsSupportOpen(false)}
-        userEmail={user?.email || 'invitado@gmail.com'}
-        onTicketCreated={handleTicketCreated}
-      />
+        <SupportModal
+          isOpen={isSupportOpen}
+          onClose={() => setIsSupportOpen(false)}
+          userEmail={user?.email || 'invitado@gmail.com'}
+          onTicketCreated={handleTicketCreated}
+        />
+      </Suspense>
 
       {/* Footer */}
       <Footer />

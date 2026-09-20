@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, MessageCircle, Star, ShieldCheck, Tag, ExternalLink } from 'lucide-react';
+import { MapPin, MessageCircle, Star, ShieldCheck, Tag, ExternalLink, Navigation } from 'lucide-react';
 import { Proveedor } from '../types/database.types';
 
 interface ProviderCardProps {
@@ -85,6 +85,15 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
                 <MapPin className="w-3 h-3 text-emerald-400" />
                 {locationLabel}
               </span>
+
+              {provider.distancia_km != null && (
+                <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-md bg-emerald-950/60 text-emerald-300 border border-emerald-500/20">
+                  <Navigation className="w-3 h-3 text-emerald-400" />
+                  {provider.distancia_km < 1
+                    ? 'A menos de 1 km'
+                    : `A ${provider.distancia_km} km`}
+                </span>
+              )}
             </div>
 
             {onRatingClick && (

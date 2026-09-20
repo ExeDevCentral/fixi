@@ -34,6 +34,7 @@ export interface Proveedor {
   activo?: boolean;
   latitud?: number;
   longitud?: number;
+  distancia_km?: number;
   dni?: string;
   email?: string;
   acepto_terminos?: boolean;

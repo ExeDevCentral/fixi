@@ -24,7 +24,7 @@ Plataforma web (SPA) que conecta **clientes** con **profesionales de servicios**
 
 ```
 .
-├── public/                    # Assets estáticos (favicon, manifest PWA)
+├── public/                    # Assets estáticos (favicon, iconos PWA, manifest generado por el build)
 ├── src/
 │   ├── components/            # UI y modales (Auth, Chat, Dashboard, modals...)
 │   │   └── shared/            # Componentes reutilizables (firma, etc.)
@@ -203,15 +203,15 @@ El proyecto es una **SPA estática de Vite**. Vercel lo detecta automáticamente
 
 ## 📌 Lo que falta / Próximos pasos
 
-- [ ] **Paginación / virtualización** de la grilla de proveedores (el bundle JS actual supera el límite de 500 kB; conviene *code-splitting* con `React.lazy` y `manualChunks`).
+- [x] **Paginación de la grilla de proveedores** (9 por página) y **code-splitting** con `React.lazy` + `manualChunks` para reducir el bundle inicial.
 - [ ] **Endpoints de backend**: mover **Resend** y cualquier lógica con clave secreta a una **Supabase Edge Function** (evita exponer `VITE_RESEND_API_KEY`).
 - [ ] **Policies RLS de `mensajes`** más estrictas (solo emisor/receptor pueden leer & insertar).
 - [ ] **Registro de usuario por email + contraseña** (hoy solo Google OAuth).
 - [ ] **Persistencia real de "proveedores contactados"** por usuario (hoy estado en memoria).
 - [ ] **Panel del proveedor**: recibir/responder solicitudes y ver alertas de trabajo (hoy las alertas se envían por email y la bolsa es pública).
-- [ ] **Búsqueda por ubicación real** (ordenar proveedores por distancia usando lat/long de `useGeolocation` + datos de latitud/longitud).
+- [x] **Ordenar por cercanía real**: con el GPS activo, botón "Más cercanos" ordena por distancia (Haversine) usando `latitud`/`longitud` de proveedor o zona, y cada tarjeta muestra su distancia.
 - [ ] **Tests automatizados** (unitarios de hooks, e2e del flujo de contacto) — actualmente no hay framework de testing configurado.
-- [ ] **PWA completo** (hay `manifest.json` y meta tags; falta Service Worker + offline).
+- [x] **PWA completo**: Service Worker con precache (vite-plugin-pwa, `registerSW` + `autoUpdate`), `manifest.webmanifest`, iconos PNG 192/512 + maskable y soporte offline con `navigateFallback`.
 - [ ] **Seguridad de la vista `proveedores_publicos`**: confirmar grants y revocar acceso no deseado.
 
 ---

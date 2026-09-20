@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured, MOCK_PROVEEDORES } from '../lib/supabase';
 import { Proveedor } from '../types/database.types';
+import { providerDistanceKm } from '../lib/geo';
 
 interface ProviderFilters {
   provinciaId?: string;
@@ -8,6 +9,33 @@ interface ProviderFilters {
   categoryId?: string;
   searchQuery?: string;
   onlyFeatured?: boolean;
+  userLatitude?: number;
+  userLongitude?: number;
+  sortByDistance?: boolean;
+}
+
+function applyDistances(
+  providers: Proveedor[],
+  lat?: number,
+  lng?: number,
+  sortByDistance = false
+): Proveedor[] {
+  if (lat == null || lng == null) return providers;
+
+  const withDistance: Proveedor[] = providers.map((p) => ({
+    ...p,
+    distancia_km: providerDistanceKm(p, lat, lng) ?? undefined,
+  }));
+
+  if (sortByDistance) {
+    withDistance.sort((a, b) => {
+      const da = a.distancia_km ?? Infinity;
+      const db = b.distancia_km ?? Infinity;
+      return da - db;
+    });
+  }
+
+  return withDistance;
 }
 
 export function useProviders(filters: ProviderFilters) {
@@ -15,7 +43,16 @@ export function useProviders(filters: ProviderFilters) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { provinciaId, zoneId, categoryId, searchQuery, onlyFeatured } = filters;
+  const {
+    provinciaId,
+    zoneId,
+    categoryId,
+    searchQuery,
+    onlyFeatured,
+    userLatitude,
+    userLongitude,
+    sortByDistance,
+  } = filters;
 
   useEffect(() => {
     async function fetchProviders() {
@@ -49,7 +86,7 @@ export function useProviders(filters: ProviderFilters) {
           );
         }
 
-        setProviders(result);
+        setProviders(applyDistances(result, userLatitude, userLongitude, sortByDistance));
         setLoading(false);
         return;
       }
@@ -98,14 +135,14 @@ export function useProviders(filters: ProviderFilters) {
           );
         }
 
-        setProviders(result);
+        setProviders(applyDistances(result, userLatitude, userLongitude, sortByDistance));
       } catch (err: any) {
         console.warn('Fallback a MOCK por error en Supabase:', err.message);
         let result = [...MOCK_PROVEEDORES];
         if (provinciaId) result = result.filter((p) => p.zona?.provincia_id === provinciaId);
         if (zoneId) result = result.filter((p) => p.zona_id === zoneId);
         if (categoryId) result = result.filter((p) => p.categoria_id === categoryId);
-        setProviders(result);
+        setProviders(applyDistances(result, userLatitude, userLongitude, sortByDistance));
         setError(err.message);
       } finally {
         setLoading(false);
@@ -113,7 +150,16 @@ export function useProviders(filters: ProviderFilters) {
     }
 
     fetchProviders();
-  }, [provinciaId, zoneId, categoryId, searchQuery, onlyFeatured]);
+  }, [
+    provinciaId,
+    zoneId,
+    categoryId,
+    searchQuery,
+    onlyFeatured,
+    userLatitude,
+    userLongitude,
+    sortByDistance,
+  ]);
 
   return { providers, loading, error };
 }
