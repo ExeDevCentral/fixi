@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wrench, ShieldCheck, User, HelpCircle, LogIn, PlusCircle, Sparkles, Activity } from 'lucide-react';
+import { Wrench, HelpCircle, LogIn, PlusCircle, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { UserProfile } from '../types/database.types';
 
@@ -10,6 +10,8 @@ interface NavbarProps {
   onOpenSupport: () => void;
   onOpenRequestJob?: () => void;
   onOpenAddProvider?: () => void;
+  activeViewMode?: 'APP_FIRST' | 'DIRECTORY';
+  onChangeViewMode?: (mode: 'APP_FIRST' | 'DIRECTORY') => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -19,6 +21,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenSupport,
   onOpenRequestJob,
   onOpenAddProvider,
+  activeViewMode = 'APP_FIRST',
+  onChangeViewMode,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#060911]/90 backdrop-blur-xl">
@@ -29,6 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           initial={{ opacity: 0, x: -15 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4 }}
+          onClick={() => onChangeViewMode?.('APP_FIRST')}
           className="flex items-center gap-3 cursor-pointer group"
         >
           <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-400 to-green-600 shadow-lg shadow-emerald-500/25 group-hover:shadow-emerald-500/40 transition-all duration-300">
@@ -40,14 +45,42 @@ export const Navbar: React.FC<NavbarProps> = ({
                 FIXI
               </span>
               <span className="text-[10px] font-extrabold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <span className="status-dot-live"></span> PRO WEB APP
+                <span className="status-dot-live"></span> APP-FIRST
               </span>
             </div>
             <span className="text-[10px] text-slate-400 font-medium tracking-wide">
-              Marketplace con GPS & Alertas
+              Red Inteligente de Servicios
             </span>
           </div>
         </motion.div>
+
+        {/* Center Mode Switcher Tabs */}
+        {onChangeViewMode && (
+          <div className="hidden md:flex items-center bg-slate-950/80 border border-slate-800 p-1 rounded-2xl shadow-inner">
+            <button
+              onClick={() => onChangeViewMode('APP_FIRST')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeViewMode === 'APP_FIRST'
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${activeViewMode === 'APP_FIRST' ? 'fill-slate-950 text-slate-950' : 'text-emerald-400'}`} />
+              <span>Experiencia en Vivo</span>
+            </button>
+
+            <button
+              onClick={() => onChangeViewMode('DIRECTORY')}
+              className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                activeViewMode === 'DIRECTORY'
+                  ? 'bg-slate-800 text-white shadow-md'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <span>Directorio Completo</span>
+            </button>
+          </div>
+        )}
 
         {/* User Auth & Web App Action Navigation */}
         <div className="flex items-center gap-2 sm:gap-3">

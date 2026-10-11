@@ -34,7 +34,7 @@ export const CompletedReviewCard: React.FC<CompletedReviewCardProps> = ({
   useEffect(() => {
     // Fire celebration confetti when entering completion
     try {
-      confetti({
+      void confetti({
         particleCount: 80,
         spread: 70,
         origin: { y: 0.6 },
@@ -56,7 +56,7 @@ export const CompletedReviewCard: React.FC<CompletedReviewCardProps> = ({
   const handleSendFeedback = () => {
     setIsSubmitted(true);
     try {
-      confetti({
+      void confetti({
         particleCount: 50,
         spread: 60,
         origin: { y: 0.7 },

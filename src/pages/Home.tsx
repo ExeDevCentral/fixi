@@ -7,8 +7,9 @@ import { JobBoard } from '../components/JobBoard';
 import { GpsAlertBanner } from '../components/GpsAlertBanner';
 import { DemoTour } from '../components/DemoTour';
 import { ProviderInterestToast } from '../components/ProviderInterestToast';
-import { PlayCircle } from 'lucide-react';
+import { PlayCircle, Sparkles } from 'lucide-react';
 import { Footer } from '../components/Footer';
+import { FixiSimulatorEngine } from '../components/simulator/FixiSimulatorEngine';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
 import { useProviders } from '../hooks/useProviders';
@@ -49,6 +50,7 @@ export const Home: React.FC = () => {
     longitude: number;
   } | null>(null);
   const [sortByDistance, setSortByDistance] = useState(false);
+  const [activeViewMode, setActiveViewMode] = useState<'APP_FIRST' | 'DIRECTORY'>('APP_FIRST');
 
   // Modals & State
   const [user, setUser] = useState<UserProfile | null>(null);
@@ -231,7 +233,7 @@ export const Home: React.FC = () => {
         <span>Ver cómo funciona</span>
       </button>
 
-      {/* Navbar with Auth & Support Controls */}
+      {/* Navbar with Auth & Support Controls and Mode Switcher */}
       <Navbar
         user={user}
         onOpenAuth={() => setIsAuthOpen(true)}
@@ -239,88 +241,120 @@ export const Home: React.FC = () => {
         onOpenSupport={() => setIsSupportOpen(true)}
         onOpenRequestJob={() => setIsRequestJobOpen(true)}
         onOpenAddProvider={() => setIsAddProviderOpen(true)}
+        activeViewMode={activeViewMode}
+        onChangeViewMode={setActiveViewMode}
       />
 
-      {/* Hero Header */}
-      <Hero
-        totalProviders={providers.length}
-        onOpenRequestJob={() => setIsRequestJobOpen(true)}
-        onOpenAddProvider={() => setIsAddProviderOpen(true)}
-      />
+      {/* Conditional View: App-First Engine vs Full Directory */}
+      {activeViewMode === 'APP_FIRST' ? (
+        <main className="flex-grow w-full py-4 sm:py-6">
+          <FixiSimulatorEngine onViewDirectory={() => setActiveViewMode('DIRECTORY')} />
+        </main>
+      ) : (
+        <>
+          {/* Header Switch Back Banner */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+            <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xl backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Sparkles className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <div className="text-white font-bold text-sm">Estás explorando el Directorio de Especialistas</div>
+                  <div className="text-slate-400">Podés navegar perfiles o probar la experiencia interactiva de punta a punta.</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setActiveViewMode('APP_FIRST')}
+                className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+              >
+                Volver al Simulador / Pedir FIXI
+              </button>
+            </div>
+          </div>
 
-      {/* GPS Geolocation Live Alert Banner */}
-      <GpsAlertBanner
-        onLocationDetected={(latitude, longitude) =>
-          setUserLocation({ latitude, longitude })
-        }
-      />
-
-      {/* Main Content Layout */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-grow py-4">
-
-        {/* Mobile View Top Filters */}
-        <div className="block lg:hidden">
-          <SearchBar
-            provincias={provincias}
-            categories={categories}
-            zones={zones}
-            selectedProvincia={selectedProvincia}
-            selectedZone={selectedZone}
-            selectedCategory={selectedCategory}
-            searchQuery={searchQuery}
-            onSelectProvincia={setSelectedProvincia}
-            onSelectZone={setSelectedZone}
-            onSelectCategory={setSelectedCategory}
-            onSearchChange={setSearchQuery}
-            onResetFilters={handleResetFilters}
+          {/* Hero Header */}
+          <Hero
+            totalProviders={providers.length}
+            onOpenRequestJob={() => setIsRequestJobOpen(true)}
+            onOpenAddProvider={() => setIsAddProviderOpen(true)}
           />
-        </div>
 
-        {/* Desktop View Layout (Sticky Sidebar + Results Grid) */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* GPS Geolocation Live Alert Banner */}
+          <GpsAlertBanner
+            onLocationDetected={(latitude, longitude) =>
+              setUserLocation({ latitude, longitude })
+            }
+          />
 
-          {/* Desktop Left Sticky Sidebar Filter */}
-          <div className="hidden lg:block lg:col-span-3">
-            <SearchBar
-              provincias={provincias}
-              categories={categories}
-              zones={zones}
-              selectedProvincia={selectedProvincia}
-              selectedZone={selectedZone}
-              selectedCategory={selectedCategory}
-              searchQuery={searchQuery}
-              onSelectProvincia={setSelectedProvincia}
-              onSelectZone={setSelectedZone}
-              onSelectCategory={setSelectedCategory}
-              onSearchChange={setSearchQuery}
-              onResetFilters={handleResetFilters}
-              isSidebarDesktop
-            />
+          {/* Main Content Layout */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full flex-grow py-4">
+
+            {/* Mobile View Top Filters */}
+            <div className="block lg:hidden">
+              <SearchBar
+                provincias={provincias}
+                categories={categories}
+                zones={zones}
+                selectedProvincia={selectedProvincia}
+                selectedZone={selectedZone}
+                selectedCategory={selectedCategory}
+                searchQuery={searchQuery}
+                onSelectProvincia={setSelectedProvincia}
+                onSelectZone={setSelectedZone}
+                onSelectCategory={setSelectedCategory}
+                onSearchChange={setSearchQuery}
+                onResetFilters={handleResetFilters}
+              />
+            </div>
+
+            {/* Desktop View Layout (Sticky Sidebar + Results Grid) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+              {/* Desktop Left Sticky Sidebar Filter */}
+              <div className="hidden lg:block lg:col-span-3">
+                <SearchBar
+                  provincias={provincias}
+                  categories={categories}
+                  zones={zones}
+                  selectedProvincia={selectedProvincia}
+                  selectedZone={selectedZone}
+                  selectedCategory={selectedCategory}
+                  searchQuery={searchQuery}
+                  onSelectProvincia={setSelectedProvincia}
+                  onSelectZone={setSelectedZone}
+                  onSelectCategory={setSelectedCategory}
+                  onSearchChange={setSearchQuery}
+                  onResetFilters={handleResetFilters}
+                  isSidebarDesktop
+                />
+              </div>
+
+              {/* Provider Results Grid & Job Board */}
+              <div className="col-span-1 lg:col-span-9 space-y-8">
+                <ProviderGrid
+                  providers={providers}
+                  loading={loadingProviders || loadingCatZone}
+                  onResetFilters={handleResetFilters}
+                  onContactClick={handleContactProvider}
+                  onRatingClick={(p) => setRatingTarget(p)}
+                  onOpenChat={handleOpenChat}
+                  sortByDistance={sortByDistance}
+                  canSortByDistance={Boolean(userLocation)}
+                  onToggleSortByDistance={() => setSortByDistance((s) => !s)}
+                />
+
+                {/* Public Job Request Board */}
+                <JobBoard
+                  solicitudes={solicitudes}
+                  onOpenCreateRequest={() => setIsRequestJobOpen(true)}
+                />
+              </div>
+
+            </div>
           </div>
-
-          {/* Provider Results Grid & Job Board */}
-          <div className="col-span-1 lg:col-span-9 space-y-8">
-            <ProviderGrid
-              providers={providers}
-              loading={loadingProviders || loadingCatZone}
-              onResetFilters={handleResetFilters}
-              onContactClick={handleContactProvider}
-              onRatingClick={(p) => setRatingTarget(p)}
-              onOpenChat={handleOpenChat}
-              sortByDistance={sortByDistance}
-              canSortByDistance={Boolean(userLocation)}
-              onToggleSortByDistance={() => setSortByDistance((s) => !s)}
-            />
-
-            {/* Public Job Request Board */}
-            <JobBoard
-              solicitudes={solicitudes}
-              onOpenCreateRequest={() => setIsRequestJobOpen(true)}
-            />
-          </div>
-
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Modals */}
       <Suspense fallback={null}>
