@@ -254,21 +254,21 @@ export const Home: React.FC = () => {
         <>
           {/* Header Switch Back Banner */}
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
-            <div className="p-4 rounded-3xl bg-gradient-to-r from-emerald-950/70 via-slate-900 to-slate-900 border border-emerald-500/30 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xl backdrop-blur-md">
+            <div className="p-4 rounded-2xl obsidian-card flex flex-col sm:flex-row items-center justify-between gap-3 text-xs shadow-xl">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center shrink-0">
                   <Sparkles className="w-4 h-4 text-emerald-400" />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-sm">Estás explorando el Directorio de Especialistas</div>
-                  <div className="text-slate-400">Podés navegar perfiles o probar la experiencia interactiva de punta a punta.</div>
+                  <div className="text-white font-semibold text-xs tracking-tight">Estás en el Directorio Abierto de Profesionales</div>
+                  <div className="text-slate-400 text-[11px]">Podés consultar los perfiles manualmente o ingresar al flujo guiado en tiempo real.</div>
                 </div>
               </div>
               <button
                 onClick={() => setActiveViewMode('APP_FIRST')}
-                className="w-full sm:w-auto px-5 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-xs transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                className="w-full sm:w-auto px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs transition-all shadow-sm active:scale-95"
               >
-                Volver al Simulador / Pedir FIXI
+                Volver a la Experiencia en Vivo
               </button>
             </div>
           </div>

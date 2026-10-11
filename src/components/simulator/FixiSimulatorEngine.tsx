@@ -16,11 +16,8 @@ import {
   CheckCircle2,
   ArrowRight,
   ChevronRight,
-  Play,
-  PlayCircle,
-  FileCheck,
   UserCheck,
-  Layers,
+  Check,
 } from 'lucide-react';
 
 import {
@@ -41,10 +38,8 @@ interface FixiSimulatorEngineProps {
 export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
   onViewDirectory,
 }) => {
-  // Current Simulator State
   const [stage, setStage] = useState<SimulatorStage>('CONFIGURING');
 
-  // Order Configuration State
   const [selectedCategory, setSelectedCategory] = useState<ServiceCategoryOption>(
     SERVICE_CATEGORIES[0]
   );
@@ -54,13 +49,9 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
   const [selectedZone, setSelectedZone] = useState<string>('Rosario (Centro)');
   const [urgency, setUrgency] = useState<'Urgente 30 min' | 'Hoy Mismo' | 'Coordinar Horario'>('Urgente 30 min');
 
-  // Tracking Dual-View state ('APP' vs 'EMAIL')
   const [trackingView, setTrackingView] = useState<'APP' | 'EMAIL'>('APP');
-
-  // Work in progress timer simulation
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
-  // Active Specialist & Order
   const activeSpecialist: SpecialistProfile =
     MOCK_SPECIALISTS[selectedCategory.id] || MOCK_SPECIALISTS['electricidad'];
 
@@ -76,13 +67,11 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
     createdAt: new Date().toISOString(),
   });
 
-  // When category changes, update problem default
   const handleSelectCategory = (cat: ServiceCategoryOption) => {
     setSelectedCategory(cat);
     setSelectedProblem(cat.commonProblems[0]);
   };
 
-  // Launch Request (Start Matching)
   const handleStartRequest = () => {
     const generatedPin = Math.floor(1000 + Math.random() * 9000).toString();
     const newOrder: FixiOrder = {
@@ -100,17 +89,15 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
     setStage('DISPATCHING');
   };
 
-  // Auto transition from radar to tracking
   useEffect(() => {
     if (stage === 'DISPATCHING') {
       const timer = setTimeout(() => {
         setStage('DISPATCHED_TRACKING');
-      }, 2400);
+      }, 2200);
       return () => clearTimeout(timer);
     }
   }, [stage]);
 
-  // Stopwatch for in-progress work
   useEffect(() => {
     let interval: any;
     if (stage === 'IN_PROGRESS') {
@@ -129,8 +116,7 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
     setElapsedSeconds(0);
   };
 
-  // Icon mapper helper
-  const renderIcon = (name: string, className = 'w-5 h-5') => {
+  const renderIcon = (name: string, className = 'w-4 h-4') => {
     switch (name) {
       case 'Zap':
         return <Zap className={className} />;
@@ -149,7 +135,6 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
     }
   };
 
-  // Formatted price helper
   const formatARS = (val: number) =>
     new Intl.NumberFormat('es-AR', {
       style: 'currency',
@@ -158,16 +143,16 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
     }).format(val);
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-4 sm:py-8">
-      {/* Top Breadcrumb Milestones Bar */}
-      <div className="mb-6 sm:mb-8 bg-slate-900/90 border border-slate-800 rounded-3xl p-3 sm:p-4 backdrop-blur-xl shadow-xl">
-        <div className="flex items-center justify-between overflow-x-auto gap-2 no-scrollbar">
+    <div className="w-full max-w-5xl mx-auto px-4 py-6 sm:py-10">
+      {/* Top Breadcrumb Milestones Bar (Enterprise Segmented Timeline) */}
+      <div className="mb-8 p-1.5 rounded-2xl glass-pill-container max-w-3xl mx-auto">
+        <div className="flex items-center justify-between overflow-x-auto gap-1 no-scrollbar">
           {[
-            { id: 'CONFIGURING', step: '1', title: '1. Pedir FIXI' },
-            { id: 'DISPATCHED_TRACKING', step: '2', title: '2. Asignación & Seguridad' },
-            { id: 'IN_PROGRESS', step: '3', title: '3. Trabajo en Vivo' },
-            { id: 'PAYMENT_GATEWAY', step: '4', title: '4. Pago Multicanal' },
-            { id: 'COMPLETED_REVIEW', step: '5', title: '5. Calificación' },
+            { id: 'CONFIGURING', title: '1. Diagnóstico' },
+            { id: 'DISPATCHED_TRACKING', title: '2. Asignación' },
+            { id: 'IN_PROGRESS', title: '3. En Domicilio' },
+            { id: 'PAYMENT_GATEWAY', title: '4. Liquidación' },
+            { id: 'COMPLETED_REVIEW', title: '5. Cierre' },
           ].map((item, idx) => {
             const isCurrent =
               stage === item.id || (stage === 'DISPATCHING' && item.id === 'CONFIGURING');
@@ -180,19 +165,20 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
               (item.id === 'PAYMENT_GATEWAY' && stage === 'COMPLETED_REVIEW');
 
             return (
-              <div key={item.id} className="flex items-center gap-2 shrink-0">
+              <div key={item.id} className="flex items-center gap-1 shrink-0">
                 <div
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-2xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs transition-all ${
                     isCurrent
-                      ? 'bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/30'
+                      ? 'bg-white text-slate-950 font-semibold shadow-sm'
                       : isPassed
-                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                      : 'bg-slate-950/40 text-slate-400 border border-slate-800/60'
+                      ? 'text-emerald-400 font-medium'
+                      : 'text-slate-500'
                   }`}
                 >
+                  {isPassed ? <Check className="w-3 h-3 text-emerald-400" /> : null}
                   <span>{item.title}</span>
                 </div>
-                {idx < 4 && <ChevronRight className="w-3.5 h-3.5 text-slate-700 shrink-0" />}
+                {idx < 4 && <ChevronRight className="w-3 h-3 text-slate-700 shrink-0" />}
               </div>
             );
           })}
@@ -205,33 +191,30 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
         {stage === 'CONFIGURING' && (
           <motion.div
             key="configuring"
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            transition={{ duration: 0.3 }}
-            className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-10 shadow-2xl backdrop-blur-xl relative overflow-hidden"
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.25 }}
+            className="rounded-3xl obsidian-card p-6 sm:p-12 shadow-2xl relative overflow-hidden"
           >
-            {/* Background ambient light */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
-
-            {/* Headline and hook */}
-            <div className="max-w-2xl mb-8">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-extrabold mb-3">
-                <PlayCircle className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
-                <span>Simulador en Tiempo Real de la Experiencia FIXI</span>
+            {/* Header info */}
+            <div className="max-w-2xl mb-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300 text-[11px] font-mono uppercase tracking-wider mb-3">
+                <span className="status-dot-live"></span>
+                <span>DESPACHO INTELIGENTE EN TIEMPO REAL</span>
               </div>
-              <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                ¿Qué necesitas solucionar en tu casa hoy?
-              </h2>
-              <p className="text-sm text-slate-400 mt-2">
-                Seleccioná el tipo de servicio para ver cómo FIXI asigna automáticamente al profesional verificado más cercano, te avisa por correo y gestiona el cobro seguro.
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.12] font-display">
+                Pedí un especialista con garantía y trazabilidad.
+              </h1>
+              <p className="text-sm text-slate-400 mt-3 leading-relaxed">
+                Seleccioná el requerimiento técnico para visualizar la asignación geolocalizada, la cédula de seguridad con PIN de puerta y la pasarela de pago custodiada.
               </p>
             </div>
 
             {/* Category selection grid */}
             <div className="mb-8">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                1. Seleccioná el oficio
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-3 font-semibold">
+                CATEGORÍA DEL SERVICIO
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                 {SERVICE_CATEGORIES.map((cat) => {
@@ -240,21 +223,29 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
                     <button
                       key={cat.id}
                       onClick={() => handleSelectCategory(cat)}
-                      className={`p-4 rounded-2xl border text-left transition-all flex flex-col justify-between gap-3 ${
+                      className={`p-4 rounded-2xl text-left transition-all flex flex-col justify-between gap-3 ${
                         isSelected
-                          ? 'bg-gradient-to-b from-emerald-500/20 to-slate-900 border-emerald-500 text-white shadow-xl shadow-emerald-500/10 scale-[1.02]'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700'
+                          ? 'bg-white text-slate-950 font-semibold shadow-lg scale-[1.02]'
+                          : 'obsidian-card-interactive text-slate-300 hover:text-white'
                       }`}
                     >
                       <div
-                        className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-tr ${cat.color} text-slate-950 shadow-md`}
+                        className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
+                          isSelected
+                            ? 'bg-slate-950 text-white'
+                            : 'bg-white/[0.05] border border-white/[0.08] text-slate-300'
+                        }`}
                       >
-                        {renderIcon(cat.iconName, 'w-5 h-5')}
+                        {renderIcon(cat.iconName, 'w-4 h-4')}
                       </div>
                       <div>
-                        <div className="text-xs font-bold leading-tight">{cat.name}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
-                          Base {formatARS(cat.defaultPrice)}
+                        <div className="text-xs font-semibold leading-tight">{cat.name}</div>
+                        <div
+                          className={`text-[10px] mt-0.5 font-mono ${
+                            isSelected ? 'text-slate-600' : 'text-slate-400'
+                          }`}
+                        >
+                          Desde {formatARS(cat.defaultPrice)}
                         </div>
                       </div>
                     </button>
@@ -265,20 +256,20 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
 
             {/* Problem chips selection */}
             <div className="mb-8">
-              <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-3">
-                2. Diagnóstico rápido del problema
+              <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-3 font-semibold">
+                DIAGNÓSTICO O MOTIVO PRINCIPAL
               </label>
-              <div className="flex flex-wrap gap-2.5">
+              <div className="flex flex-wrap gap-2">
                 {selectedCategory.commonProblems.map((prob) => {
                   const isSelected = selectedProblem === prob;
                   return (
                     <button
                       key={prob}
                       onClick={() => setSelectedProblem(prob)}
-                      className={`text-xs px-4 py-2.5 rounded-xl border transition-all ${
+                      className={`text-xs px-3.5 py-2 rounded-xl transition-all ${
                         isSelected
-                          ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md shadow-emerald-500/20'
-                          : 'bg-slate-950/60 text-slate-300 border-slate-800 hover:border-slate-700'
+                          ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                          : 'bg-white/[0.03] text-slate-300 border border-white/[0.07] hover:border-white/[0.15]'
                       }`}
                     >
                       {prob}
@@ -289,17 +280,17 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
             </div>
 
             {/* Zone and urgency selector row */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  3. Tu Zona en Rosario y Región
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-2 font-semibold">
+                  UBICACIÓN EN ROSARIO & REGIÓN
                 </label>
                 <div className="relative">
-                  <MapPin className="w-4 h-4 text-emerald-400 absolute left-3.5 top-3.5 pointer-events-none" />
+                  <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
                   <select
                     value={selectedZone}
                     onChange={(e) => setSelectedZone(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-emerald-500 outline-none appearance-none"
+                    className="w-full bg-black/40 border border-white/[0.09] rounded-xl pl-10 pr-4 py-3 text-sm text-white focus:border-white/30 outline-none appearance-none font-medium"
                   >
                     <option value="Rosario (Centro)">Rosario (Centro y Microcentro)</option>
                     <option value="Rosario (Pichincha)">Rosario (Pichincha / Echesortu)</option>
@@ -312,18 +303,18 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2">
-                  4. Nivel de Urgencia
+                <label className="block text-[11px] font-mono uppercase tracking-wider text-slate-400 mb-2 font-semibold">
+                  PLAZO DE ATENCIÓN
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['Urgente 30 min', 'Hoy Mismo', 'Coordinar Horario'] as const).map((urg) => (
                     <button
                       key={urg}
                       onClick={() => setUrgency(urg)}
-                      className={`text-xs py-3 px-2 rounded-xl border text-center transition-all ${
+                      className={`text-xs py-3 px-2 rounded-xl text-center transition-all ${
                         urgency === urg
-                          ? 'bg-amber-500/20 border-amber-500 text-amber-300 font-bold'
-                          : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-300'
+                          ? 'bg-white text-slate-950 font-semibold shadow-sm'
+                          : 'bg-black/30 border border-white/[0.07] text-slate-400 hover:text-slate-200'
                       }`}
                     >
                       {urg}
@@ -334,82 +325,82 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
             </div>
 
             {/* Action Bar */}
-            <div className="pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-xs text-slate-400 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Asignación con verificación de matrícula y antecedentes.</span>
+                <span>Especialistas matriculados con cobertura de responsabilidad civil contratada.</span>
               </div>
 
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <button
                   onClick={onViewDirectory}
-                  className="px-5 py-3.5 rounded-2xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 transition-all"
+                  className="px-5 py-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 text-xs font-medium border border-white/[0.08] transition-all"
                 >
-                  Ver Directorio
+                  Directorio Clásico
                 </button>
 
                 <button
                   onClick={handleStartRequest}
-                  className="flex-1 sm:flex-initial px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/25 transition-all active:scale-95"
+                  className="flex-1 sm:flex-initial px-7 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all active:scale-[0.98]"
                 >
-                  <span>Pedir mi FIXI Ahora</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Iniciar Despacho en Vivo</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
           </motion.div>
         )}
 
-        {/* 2. STAGE: DISPATCHING (RADAR MATCHING) */}
+        {/* 2. STAGE: DISPATCHING (RADAR MATCHING - FLIGHT/RADAR INTERFACE) */}
         {stage === 'DISPATCHING' && (
           <motion.div
             key="dispatching"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            className="rounded-3xl bg-slate-900/90 border border-slate-800 p-8 sm:p-14 text-center shadow-2xl backdrop-blur-xl max-w-xl mx-auto space-y-6"
+            exit={{ opacity: 0, scale: 0.98 }}
+            className="rounded-3xl obsidian-card p-8 sm:p-14 text-center shadow-2xl max-w-lg mx-auto space-y-6"
           >
-            {/* Animated Radar Visual */}
+            {/* Precision Radar Visual */}
             <div className="relative w-36 h-36 mx-auto flex items-center justify-center">
-              <div className="absolute inset-0 rounded-full border border-emerald-500/20 animate-ping" />
-              <div className="absolute inset-4 rounded-full border border-emerald-500/40 animate-pulse" />
-              <div className="w-20 h-20 rounded-full bg-emerald-500/10 border-2 border-emerald-500 flex items-center justify-center shadow-xl shadow-emerald-500/20">
-                <Radar className="w-10 h-10 text-emerald-400 animate-spin" style={{ animationDuration: '3s' }} />
+              <div className="absolute inset-0 rounded-full border border-white/[0.08] animate-ping" />
+              <div className="absolute inset-3 rounded-full border border-white/[0.12]" />
+              <div className="w-20 h-20 rounded-full bg-white/[0.03] border border-white/[0.2] flex items-center justify-center shadow-2xl">
+                <Radar className="w-8 h-8 text-emerald-400 animate-spin" style={{ animationDuration: '2.5s' }} />
               </div>
             </div>
 
             <div>
-              <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
-                Algoritmo de Asignación en Vivo
+              <span className="text-[10px] font-mono tracking-widest text-emerald-400 uppercase bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                PROCESAMIENTO DE DESPACHO
               </span>
-              <h3 className="text-xl sm:text-2xl font-black text-white mt-3">
-                Buscando el mejor FIXI-Pro en {selectedZone}...
+              <h3 className="text-xl sm:text-2xl font-bold text-white mt-3 tracking-tight font-display">
+                Localizando especialista en {selectedZone}...
               </h3>
-              <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1">
-                Filtrando especialistas certificados en {selectedCategory.name} con calificación mínima de 4.8 estrellas y cercanía inmediata.
+              <p className="text-xs text-slate-400 max-w-sm mx-auto mt-1 leading-relaxed">
+                Asignando el profesional más cercano habilitado en {selectedCategory.name} con calificación verificada mayor a 4.8.
               </p>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-400 max-w-xs mx-auto">
+            <div className="space-y-2 text-xs text-slate-400 max-w-xs mx-auto font-mono text-[11px]">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Geolocalizando profesionales a menos de 5 km</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Geolocalización en radio de 5 km</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Verificando matrícula oficial y antecedentes</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Verificación de matrícula al día</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                <span>Generando PIN de seguridad para apertura</span>
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Generación de PIN de custodia</span>
               </div>
             </div>
 
             <button
               onClick={() => setStage('DISPATCHED_TRACKING')}
-              className="text-xs text-slate-500 hover:text-slate-300 underline pt-2"
+              className="text-[11px] text-slate-500 hover:text-slate-300 underline pt-1 font-mono"
             >
-              Saltar animación e ir directo al seguimiento
+              Omitir espera e ir directo
             </button>
           </motion.div>
         )}
@@ -418,121 +409,121 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
         {stage === 'DISPATCHED_TRACKING' && (
           <motion.div
             key="tracking"
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
+            exit={{ opacity: 0, y: -10 }}
             className="space-y-6"
           >
             {/* View Switcher Header Bar */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between bg-slate-900/90 border border-slate-800 p-4 rounded-3xl gap-3">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between obsidian-card p-4 rounded-3xl gap-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-white/[0.05] border border-white/[0.1] flex items-center justify-center shrink-0">
                   <UserCheck className="w-5 h-5 text-emerald-400" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    ¡Especialista Asignado! {activeSpecialist.nombre} va en camino
+                  <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                    Especialista Asignado: {activeSpecialist.nombre} en viaje
                   </h3>
                   <p className="text-xs text-slate-400">
-                    Cambia de vista para comprobar la pantalla de la app o el correo de seguridad recibido.
+                    Inspeccioná la vista de la app móvil o conmutá al correo corporativo recibido.
                   </p>
                 </div>
               </div>
 
               {/* Toggle Buttons */}
-              <div className="flex items-center gap-2 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+              <div className="flex items-center glass-pill-container p-1 rounded-2xl">
                 <button
                   onClick={() => setTrackingView('APP')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs transition-all ${
                     trackingView === 'APP'
-                      ? 'bg-emerald-500 text-slate-950 shadow-md'
+                      ? 'bg-white text-slate-950 font-semibold shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <Smartphone className="w-3.5 h-3.5" />
-                  <span>Vista App Móvil</span>
+                  <span>Terminal App</span>
                 </button>
 
                 <button
                   onClick={() => setTrackingView('EMAIL')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
+                  className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs transition-all ${
                     trackingView === 'EMAIL'
-                      ? 'bg-emerald-500 text-slate-950 shadow-md'
+                      ? 'bg-white text-slate-950 font-semibold shadow-sm'
                       : 'text-slate-400 hover:text-white'
                   }`}
                 >
                   <Mail className="w-3.5 h-3.5" />
-                  <span>Email de Seguridad Recibido</span>
+                  <span>Email Oficial Recibido</span>
                 </button>
               </div>
             </div>
 
             {/* Sub-view 1: Native Mobile Tracker View */}
             {trackingView === 'APP' && (
-              <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-8 shadow-2xl backdrop-blur-xl space-y-6">
-                <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-slate-950/70 border border-slate-800">
+              <div className="rounded-3xl obsidian-card p-6 sm:p-8 shadow-2xl space-y-6">
+                <div className="flex flex-col sm:flex-row items-center gap-6 p-6 rounded-2xl bg-black/40 border border-white/[0.08]">
                   <img
                     src={activeSpecialist.foto}
                     alt={activeSpecialist.nombre}
-                    className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl object-cover border-2 border-emerald-500/50 shadow-xl"
+                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl object-cover border border-white/[0.15] shadow-lg"
                   />
                   <div className="flex-1 text-center sm:text-left space-y-1.5">
                     <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
-                      <h3 className="text-xl font-black text-white">{activeSpecialist.nombre}</h3>
-                      <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/30 flex items-center gap-1">
-                        <ShieldCheck className="w-3.5 h-3.5" /> Matrícula Verificada
+                      <h3 className="text-xl font-bold text-white tracking-tight">{activeSpecialist.nombre}</h3>
+                      <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md border border-emerald-500/20 flex items-center gap-1">
+                        <ShieldCheck className="w-3 h-3" /> Habilitado
                       </span>
                     </div>
-                    <p className="text-xs text-slate-300 font-medium">{activeSpecialist.titulo}</p>
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-400">
-                      <span>DNI: <strong className="text-white">{activeSpecialist.dniEnmascarado}</strong></span>
+                    <p className="text-xs text-slate-300">{activeSpecialist.titulo}</p>
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-xs text-slate-400 font-mono text-[11px]">
+                      <span>DNI: <strong className="text-slate-200">{activeSpecialist.dniEnmascarado}</strong></span>
                       <span>•</span>
-                      <span>Movilidad: <strong className="text-white">{activeSpecialist.vehiculo} ({activeSpecialist.patente})</strong></span>
+                      <span>Vehículo: <strong className="text-slate-200">{activeSpecialist.vehiculo} ({activeSpecialist.patente})</strong></span>
                     </div>
                   </div>
 
                   {/* Arrival ETA Badge */}
-                  <div className="bg-emerald-500/10 border border-emerald-500/30 p-4 rounded-2xl text-center shrink-0">
-                    <div className="text-[11px] text-emerald-400 font-bold uppercase">Llegada Estimada</div>
-                    <div className="text-3xl font-black text-white font-mono my-0.5">
+                  <div className="bg-white/[0.03] border border-white/[0.09] p-4 rounded-2xl text-center shrink-0">
+                    <div className="text-[10px] text-slate-400 uppercase font-mono">TIEMPO ESTIMADO</div>
+                    <div className="text-3xl font-bold text-white font-mono tracking-tight my-0.5">
                       {activeSpecialist.tiempoLlegadaMinutos} min
                     </div>
-                    <div className="text-[10px] text-slate-400">En viaje hacia {currentOrder.zona}</div>
+                    <div className="text-[11px] text-slate-400">En ruta hacia {currentOrder.zona}</div>
                   </div>
                 </div>
 
                 {/* Key Metrics and Safety Instructions */}
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                  <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800">
-                    <div className="text-slate-400 mb-1">Duración estimada del trabajo</div>
-                    <div className="text-base font-bold text-white flex items-center gap-1.5">
-                      <Clock className="w-4 h-4 text-amber-400" /> ~{activeSpecialist.tiempoEstimadoTrabajoMinutos} minutos
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                    <div className="text-slate-400 text-[11px] mb-1 font-mono">DURACIÓN TRABAJO</div>
+                    <div className="text-base font-semibold text-white flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-slate-400" /> ~{activeSpecialist.tiempoEstimadoTrabajoMinutos} minutos
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-slate-950/50 border border-slate-800">
-                    <div className="text-slate-400 mb-1">Presupuesto de referencia</div>
-                    <div className="text-base font-bold text-white flex items-center gap-1.5">
+                  <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06]">
+                    <div className="text-slate-400 text-[11px] mb-1 font-mono">PRESUPUESTO ESTIMADO</div>
+                    <div className="text-base font-semibold text-white flex items-center gap-1.5">
                       <Zap className="w-4 h-4 text-emerald-400" /> {formatARS(currentOrder.precioEstimado)}
                     </div>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
-                    <div className="text-amber-300 font-bold mb-1">Código PIN de Validación</div>
-                    <div className="text-base font-black text-white font-mono tracking-widest">
+                  <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
+                    <div className="text-amber-300 font-mono text-[11px] font-semibold mb-1">PIN DE PUERTA</div>
+                    <div className="text-base font-bold text-white font-mono tracking-widest">
                       {currentOrder.pinSeguridad}
                     </div>
                   </div>
                 </div>
 
                 {/* Action button to proceed to Arrival */}
-                <div className="pt-4 border-t border-slate-800 flex justify-end">
+                <div className="pt-4 border-t border-white/[0.08] flex justify-end">
                   <button
                     onClick={() => setStage('IN_PROGRESS')}
-                    className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                    className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
                   >
-                    <span>Simular que el Profesional Llegó a tu Casa</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Simular Arribo del Profesional al Domicilio</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -545,10 +536,10 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
                 <div className="flex justify-center">
                   <button
                     onClick={() => setStage('IN_PROGRESS')}
-                    className="px-6 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm flex items-center gap-2 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                    className="px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs flex items-center gap-2 shadow-sm active:scale-[0.98] transition-all"
                   >
-                    <span>Continuar Simulación (Profesional en Domicilio)</span>
-                    <ArrowRight className="w-4 h-4" />
+                    <span>Continuar Simulación (Profesional en Puerta)</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -560,18 +551,18 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
         {stage === 'IN_PROGRESS' && (
           <motion.div
             key="inprogress"
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
-            className="rounded-3xl bg-slate-900/90 border border-slate-800 p-6 sm:p-10 shadow-2xl backdrop-blur-xl space-y-8"
+            exit={{ opacity: 0, y: -10 }}
+            className="rounded-3xl obsidian-card p-6 sm:p-10 shadow-2xl space-y-8"
           >
             {/* Header with live timer */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-800 gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.08] gap-4">
               <div>
-                <span className="text-xs font-bold text-amber-400 uppercase tracking-widest bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-flex items-center gap-1.5 mb-2">
-                  <Clock className="w-3.5 h-3.5 animate-spin" /> Trabajo en Ejecución
+                <span className="text-[10px] font-mono tracking-widest text-amber-400 uppercase bg-amber-500/10 px-3 py-1 rounded-full border border-amber-500/20 inline-flex items-center gap-1.5 mb-2 font-semibold">
+                  <Clock className="w-3 h-3 animate-spin" /> SERVICIO EN EJECUCIÓN
                 </span>
-                <h2 className="text-xl sm:text-3xl font-black text-white">
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight font-display">
                   {activeSpecialist.nombre} está realizando la reparación
                 </h2>
                 <p className="text-xs text-slate-400 mt-1">
@@ -580,36 +571,36 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
               </div>
 
               {/* Stopwatch Box */}
-              <div className="bg-slate-950 p-4 rounded-2xl border border-slate-800 text-right">
-                <div className="text-[11px] text-slate-400">Tiempo de trabajo transcurrido:</div>
-                <div className="font-mono text-3xl font-black text-emerald-400">
+              <div className="bg-black/40 p-4 rounded-2xl border border-white/[0.08] text-right">
+                <div className="text-[10px] font-mono uppercase text-slate-400">CRONÓMETRO ACTIVO</div>
+                <div className="font-mono text-3xl font-bold text-white my-0.5 tracking-tight">
                   {Math.floor(elapsedSeconds / 60)
                     .toString()
                     .padStart(2, '0')}
                   :{(elapsedSeconds % 60).toString().padStart(2, '0')}
                 </div>
-                <div className="text-[10px] text-slate-400 mt-0.5">Estimado: ~{activeSpecialist.tiempoEstimadoTrabajoMinutos} min</div>
+                <div className="text-[10px] text-slate-400 font-mono">Estimación: ~{activeSpecialist.tiempoEstimadoTrabajoMinutos} min</div>
               </div>
             </div>
 
             {/* Checklist of steps in the house */}
             <div className="space-y-3">
-              <div className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Bitácora de servicio en tu domicilio:
+              <div className="text-[11px] font-mono uppercase tracking-wider text-slate-400 font-semibold">
+                BITÁCORA EN TIEMPO REAL
               </div>
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 {[
-                  { title: 'Validación de identidad en puerta con PIN seguro', done: true },
-                  { title: 'Inspección técnica preliminar y confirmación de presupuesto', done: true },
-                  { title: 'Reparación / reemplazo de materiales con repuestos certificados', done: elapsedSeconds >= 3 },
-                  { title: 'Prueba de funcionamiento final y limpieza del área', done: elapsedSeconds >= 6 },
+                  { title: 'Validación en puerta mediante PIN recitado', done: true },
+                  { title: 'Diagnóstico preliminar e inspección de seguridad', done: true },
+                  { title: 'Reparación técnica con repuestos certificados', done: elapsedSeconds >= 2 },
+                  { title: 'Prueba de carga, verificación funcional y limpieza', done: elapsedSeconds >= 4 },
                 ].map((item, i) => (
                   <div
                     key={i}
                     className={`p-3.5 rounded-2xl border flex items-center justify-between transition-all ${
                       item.done
-                        ? 'bg-emerald-500/10 border-emerald-500/30 text-white'
-                        : 'bg-slate-950/40 border-slate-800 text-slate-400'
+                        ? 'bg-white/[0.03] border-white/[0.1] text-white'
+                        : 'bg-black/20 border-white/[0.05] text-slate-500'
                     }`}
                   >
                     <div className="flex items-center gap-3 text-xs font-medium">
@@ -620,8 +611,8 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
                       )}
                       <span>{item.title}</span>
                     </div>
-                    <span className="text-[10px] font-mono font-bold uppercase">
-                      {item.done ? 'Completado' : 'Pendiente'}
+                    <span className="text-[10px] font-mono uppercase font-semibold">
+                      {item.done ? 'Completado' : 'En proceso'}
                     </span>
                   </div>
                 ))}
@@ -629,16 +620,16 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
             </div>
 
             {/* Action button to finish work and pay */}
-            <div className="pt-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div className="pt-4 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="text-xs text-slate-400">
-                Al finalizar, no abones hasta que el especialista te muestre la prueba completa del arreglo.
+                Abonás únicamente luego de verificar personalmente el correcto funcionamiento.
               </div>
               <button
                 onClick={() => setStage('PAYMENT_GATEWAY')}
-                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-black text-sm flex items-center justify-center gap-2 shadow-xl shadow-emerald-500/20 active:scale-95 transition-all"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
               >
-                <span>Trabajo Terminado • Ir a Cobro</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>Trabajo Verificado • Pasar a Liquidación</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </motion.div>
@@ -648,9 +639,9 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
         {stage === 'PAYMENT_GATEWAY' && (
           <motion.div
             key="payment"
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
+            exit={{ opacity: 0, y: -10 }}
           >
             <PaymentGatewaySimulator
               order={currentOrder}
@@ -663,9 +654,9 @@ export const FixiSimulatorEngine: React.FC<FixiSimulatorEngineProps> = ({
         {stage === 'COMPLETED_REVIEW' && (
           <motion.div
             key="review"
-            initial={{ opacity: 0, y: 15 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -15 }}
+            exit={{ opacity: 0, y: -10 }}
           >
             <CompletedReviewCard
               specialist={activeSpecialist}
