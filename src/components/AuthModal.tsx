@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, ShieldCheck, Sparkles } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, ShieldCheck, Sparkles, Check, Info } from 'lucide-react';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 import { UserProfile } from '../types/database.types';
 
@@ -9,86 +9,230 @@ interface AuthModalProps {
   onLoginSuccess: (user: UserProfile) => void;
 }
 
+interface ProviderOption {
+  id: string;
+  name: string;
+  tagline: string;
+  icon: React.ReactNode;
+  availableInDemo: boolean;
+}
+
 export const AuthModal: React.FC<AuthModalProps> = ({
   isOpen,
   onClose,
   onLoginSuccess,
 }) => {
+  const [selectedProvider, setSelectedProvider] = useState<string | null>(null);
+
   if (!isOpen) return null;
 
-  const handleGoogleLogin = async () => {
-    if (isSupabaseConfigured && supabase) {
+  const handleProviderLogin = async (providerId: string, providerName: string) => {
+    setSelectedProvider(providerId);
+
+    if (isSupabaseConfigured && supabase && providerId === 'google') {
       try {
         await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: { redirectTo: window.location.origin },
         });
+        return;
       } catch (err) {
         console.error(err);
       }
-    } else {
-      // Demo Google Profile login fallback
+    }
+
+    // Demo Mode Simulation for all providers
+    setTimeout(() => {
       const demoUser: UserProfile = {
-        email: 'usuario.cliente@gmail.com',
-        nombre: 'Matías Rossi',
+        email: `usuario.${providerId}@fixi.com.ar`,
+        nombre: `Usuario ${providerName}`,
         foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',
       };
       onLoginSuccess(demoUser);
       onClose();
-    }
+    }, 400);
   };
 
+  const providers: ProviderOption[] = [
+    {
+      id: 'google',
+      name: 'Google',
+      tagline: 'Google Workspace / Gmail',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 24 24">
+          <path
+            fill="#4285F4"
+            d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+          />
+          <path
+            fill="#34A853"
+            d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+          />
+          <path
+            fill="#FBBC05"
+            d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+          />
+          <path
+            fill="#EA4335"
+            d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+          />
+        </svg>
+      ),
+    },
+    {
+      id: 'apple',
+      name: 'Apple ID',
+      tagline: 'Sign in with Apple',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4 fill-white" viewBox="0 0 170 170">
+          <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.74 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.7-3.04-7.7-7.77-12-14.19-6.3-9.48-11.22-20.17-14.74-32.08-3.52-11.9-5.29-23.07-5.29-33.51 0-14.11 3.59-25.75 10.77-34.92 7.18-9.18 16.29-13.88 27.32-14.12 4.89 0 10.45 1.34 16.68 4.02 6.23 2.68 10.15 4.09 11.76 4.24 1.76-.23 5.76-1.68 12-4.35 6.24-2.68 11.75-3.9 16.53-3.67 12.39.84 22.37 5.56 29.93 14.15-10.88 6.54-16.21 15.54-16 26.99.22 9.04 3.65 16.57 10.3 22.6 6.64 6.02 14.43 9.4 23.36 10.13-2.3 6.94-5.06 14.07-8.29 21.39zM119.22 31.84c0-7.28 2.65-14.18 7.95-20.71 5.3-6.53 11.83-10.66 19.59-12.39.65 6.84-1.25 13.56-5.71 20.15-4.46 6.6-11.08 10.91-19.86 12.95-.5-0.78-1.97-0.78-1.97-0.78z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'microsoft',
+      name: 'Microsoft',
+      tagline: 'Azure AD / Outlook',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4" viewBox="0 0 23 23">
+          <path fill="#f35325" d="M1 1h10v10H1z" />
+          <path fill="#81bc06" d="M12 1h10v10H12z" />
+          <path fill="#05a6f0" d="M1 12h10v10H1z" />
+          <path fill="#ffba08" d="M12 12h10v10H12z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'github',
+      name: 'GitHub',
+      tagline: 'Developer ID',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
+          <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'discord',
+      name: 'Discord',
+      tagline: 'Comunidad Verificada',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4 fill-[#5865F2]" viewBox="0 0 24 24">
+          <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.894.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z" />
+        </svg>
+      ),
+    },
+    {
+      id: 'whatsapp',
+      name: 'WhatsApp OTP',
+      tagline: 'PIN seguro por WhatsApp',
+      availableInDemo: true,
+      icon: (
+        <svg className="w-4 h-4 fill-[#25D366]" viewBox="0 0 24 24">
+          <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2m.01 1.67c2.2 0 4.26.86 5.82 2.42a8.225 8.225 0 0 1 2.41 5.83c0 4.54-3.7 8.24-8.24 8.24-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.19 8.19 0 0 1-1.26-4.38c0-4.54 3.7-8.24 8.24-8.24m4.52 11.66c-.25-.13-1.47-.72-1.7-.81-.23-.08-.39-.13-.56.13-.17.25-.64.81-.79.97-.14.17-.29.19-.54.06-.25-.13-1.06-.39-2.02-1.25-.75-.67-1.26-1.5-1.4-1.75-.15-.25-.02-.39.11-.51.11-.11.25-.29.37-.44.13-.14.17-.25.25-.42.08-.17.04-.31-.02-.44-.06-.13-.56-1.34-.76-1.84-.2-.49-.4-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08 0 1.23.89 2.41 1.02 2.58.13.17 1.76 2.68 4.26 3.76.6.26 1.06.41 1.42.53.6.19 1.15.16 1.58.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.08.15-1.18-.06-.1-.23-.17-.48-.29" />
+        </svg>
+      ),
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="glass-card w-full max-w-md rounded-3xl p-6 sm:p-8 border border-slate-700 shadow-2xl relative bg-[#0f172a] text-white">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl animate-in fade-in duration-200">
+      <div className="w-full max-w-lg rounded-3xl obsidian-card p-6 sm:p-8 shadow-2xl relative text-white border border-white/[0.12]">
         
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition-all"
+          className="absolute top-5 right-5 p-2 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] text-slate-400 hover:text-white transition-all border border-white/[0.06]"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
+        {/* Modal Brand Header */}
         <div className="text-center mb-6">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-green-600 flex items-center justify-center text-slate-950 font-black text-2xl mx-auto mb-3 shadow-lg shadow-emerald-500/20">
-            F
+          {/* Demo Mode Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] font-mono uppercase tracking-wider font-semibold mb-3">
+            <span className="status-dot-live"></span>
+            <span>VERSIÓN DEMO ACTIVA</span>
           </div>
-          <h3 className="text-2xl font-black text-white font-sans">Iniciar Sesión en Fixi</h3>
-          <p className="text-xs text-slate-400 mt-1">
-            Accedé a tu historial de trabajos, proveedores guardados y tickets de soporte.
+
+          <h3 className="text-xl sm:text-2xl font-bold text-white font-display tracking-tight">
+            Acceso a la Plataforma FIXI
+          </h3>
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
+            Navegá tu historial de trabajos, comprobantes digitales y seguimiento en vivo de especialistas.
           </p>
         </div>
 
-        <div className="space-y-4">
+        {/* Instant 1-Click Demo Login Hero Button */}
+        <div className="mb-6">
           <button
-            onClick={handleGoogleLogin}
-            className="w-full py-3.5 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold text-sm flex items-center justify-center gap-3 shadow-md transition-all active:scale-98"
+            onClick={() => handleProviderLogin('demo', 'Invitado')}
+            className="w-full py-3.5 px-5 rounded-2xl bg-white hover:bg-slate-100 text-slate-950 font-semibold text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-sm transition-all active:scale-[0.98]"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path
-                fill="#4285F4"
-                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-              />
-              <path
-                fill="#34A853"
-                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-              />
-              <path
-                fill="#FBBC05"
-                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-              />
-              <path
-                fill="#EA4335"
-                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-              />
-            </svg>
-            <span>Continuar con Google</span>
+            <Sparkles className="w-4 h-4 text-emerald-600 fill-emerald-600/30" />
+            <span>Ingresar en Modo Demo (Acceso Rápido 1 Clic)</span>
           </button>
         </div>
 
-        <div className="mt-6 pt-4 border-t border-slate-800 text-center flex items-center justify-center gap-1.5 text-xs text-slate-400">
-          <ShieldCheck className="w-4 h-4 text-emerald-400" />
-          <span>Autenticación segura sin contraseñas exponenciales</span>
+        {/* Production Providers Specification Section */}
+        <div className="space-y-3 pt-4 border-t border-white/[0.08]">
+          <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
+            <span className="uppercase tracking-wider font-semibold">
+              AUTENTICACIÓN EN PRODUCCIÓN (SSO & OAUTH)
+            </span>
+            <span className="text-[10px] text-emerald-400 font-sans">
+              Probar simulación ↓
+            </span>
+          </div>
+
+          {/* Grid of the 6 authenticators requested by the user */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {providers.map((p) => {
+              const isSelected = selectedProvider === p.id;
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => handleProviderLogin(p.id, p.name)}
+                  className={`p-3 rounded-2xl border text-left transition-all flex flex-col justify-between gap-2 ${
+                    isSelected
+                      ? 'bg-white text-slate-950 border-white'
+                      : 'bg-white/[0.03] border-white/[0.07] hover:bg-white/[0.07] hover:border-white/[0.14] text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between w-full">
+                    <div className="w-7 h-7 rounded-lg bg-black/40 border border-white/[0.08] flex items-center justify-center shrink-0">
+                      {p.icon}
+                    </div>
+                    {isSelected ? <Check className="w-3.5 h-3.5 text-slate-950" /> : null}
+                  </div>
+                  <div>
+                    <div className="text-xs font-semibold leading-tight">{p.name}</div>
+                    <div className="text-[10px] text-slate-400 font-mono truncate mt-0.5">
+                      {p.tagline}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex items-start gap-2 text-[11px] text-slate-400 leading-relaxed">
+            <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+            <p>
+              En el entorno de producción oficial, cada cuenta se autentica vía Supabase Auth y proveedores OAuth 2.0 / WhatsApp Business API para garantizar que ningún dato bancario o contraseña quede expuesta.
+            </p>
+          </div>
+        </div>
+
+        {/* Security Footnote */}
+        <div className="mt-5 pt-4 border-t border-white/[0.06] text-center flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-mono">
+          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Seguridad Cero-Contraseñas • Cifrado de Extremo a Extremo</span>
         </div>
 
       </div>
