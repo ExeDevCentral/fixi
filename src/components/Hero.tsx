@@ -1,40 +1,6 @@
-import React, { lazy, Suspense, useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { Zap, MessageSquare, MapPin, Star } from 'lucide-react';
-
-const HeroScene3D = lazy(() => import('./HeroScene3D'));
-
-function SceneBackground() {
-  const [renderScene, setRenderScene] = useState(false);
-
-  useEffect(() => {
-    // Defer the three.js chunk until after the initial paint
-    let id: number | ReturnType<typeof setTimeout>;
-    const hasIdle = typeof (window as any).requestIdleCallback === 'function';
-    if (hasIdle) {
-      id = (window as any).requestIdleCallback(() => setRenderScene(true), { timeout: 1200 });
-    } else {
-      id = window.setTimeout(() => setRenderScene(true), 400);
-    }
-    return () => {
-      if (hasIdle) {
-        (window as any).cancelIdleCallback(id);
-      } else {
-        window.clearTimeout(id);
-      }
-    };
-  }, []);
-
-  if (!renderScene) return null;
-
-  return (
-    <div className="absolute inset-0 z-0 pointer-events-none opacity-40 hidden sm:block">
-      <Suspense fallback={null}>
-        <HeroScene3D />
-      </Suspense>
-    </div>
-  );
-}
 
 interface HeroProps {
   totalProviders: number;
@@ -48,11 +14,7 @@ export const Hero: React.FC<HeroProps> = ({
   onOpenAddProvider,
 }) => {
   return (
-    <section className="relative flex flex-col items-center justify-center overflow-hidden py-10 sm:py-16 px-4 bg-app-glow">
-      
-      {/* 3D Canvas Background (Desktop/Tablet, deferred) */}
-      <SceneBackground />
-
+    <section className="relative flex flex-col items-center justify-center overflow-hidden py-10 sm:py-16 px-4">
       <div className="relative z-10 max-w-4xl mx-auto text-center flex flex-col items-center">
         
         {/* Top Tagline Badge */}

@@ -10,6 +10,7 @@ import { ProviderInterestToast } from '../components/ProviderInterestToast';
 import { PlayCircle, Sparkles } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { FixiSimulatorEngine } from '../components/simulator/FixiSimulatorEngine';
+import { TopographicBackground } from '../components/TopographicBackground';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
 import { useProviders } from '../hooks/useProviders';
@@ -219,10 +220,10 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#05070d] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen flex flex-col bg-[#06080d] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black relative">
 
-      {/* Animated brand aurora background */}
-      <div className="fixi-aurora" aria-hidden="true" />
+      {/* Topographic organic relief lines with traveling pulse waves */}
+      <TopographicBackground />
 
       {/* Floating demo tour launcher */}
       <button
