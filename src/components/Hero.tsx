@@ -9,15 +9,16 @@ function SceneBackground() {
 
   useEffect(() => {
     // Defer the three.js chunk until after the initial paint
-    let id: number;
-    if ('requestIdleCallback' in window) {
-      id = window.requestIdleCallback(() => setRenderScene(true), { timeout: 1200 });
+    let id: number | ReturnType<typeof setTimeout>;
+    const hasIdle = typeof (window as any).requestIdleCallback === 'function';
+    if (hasIdle) {
+      id = (window as any).requestIdleCallback(() => setRenderScene(true), { timeout: 1200 });
     } else {
       id = window.setTimeout(() => setRenderScene(true), 400);
     }
     return () => {
-      if ('cancelIdleCallback' in window) {
-        window.cancelIdleCallback(id);
+      if (hasIdle) {
+        (window as any).cancelIdleCallback(id);
       } else {
         window.clearTimeout(id);
       }

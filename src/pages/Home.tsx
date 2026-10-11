@@ -5,6 +5,9 @@ import { SearchBar } from '../components/SearchBar';
 import { ProviderGrid } from '../components/ProviderGrid';
 import { JobBoard } from '../components/JobBoard';
 import { GpsAlertBanner } from '../components/GpsAlertBanner';
+import { DemoTour } from '../components/DemoTour';
+import { ProviderInterestToast } from '../components/ProviderInterestToast';
+import { PlayCircle } from 'lucide-react';
 import { Footer } from '../components/Footer';
 
 import { useCategoriesAndZones } from '../hooks/useCategoriesAndZones';
@@ -56,6 +59,8 @@ export const Home: React.FC = () => {
   const [isAddProviderOpen, setIsAddProviderOpen] = useState(false);
   const [ratingTarget, setRatingTarget] = useState<Proveedor | null>(null);
   const [chatTarget, setChatTarget] = useState<Proveedor | null>(null);
+  const [isTourOpen, setIsTourOpen] = useState(false);
+  const [interestedProviders, setInterestedProviders] = useState<Proveedor[]>([]);
 
   // User activity history, messages, job requests & support tickets
   const [contactedProviders, setContactedProviders] = useState<Proveedor[]>([]);
@@ -192,10 +197,39 @@ export const Home: React.FC = () => {
 
   const handleRequestCreated = (newReq: SolicitudTrabajo) => {
     setSolicitudes((prev) => [newReq, ...prev]);
+
+    // ===== DEMO: simulate providers showing interest in the new request =====
+    if (!isSupabaseConfigured && providers.length > 0) {
+      const shuffled = [...providers].sort(() => Math.random() - 0.5).slice(0, 2);
+      shuffled.forEach((p, i) => {
+        setTimeout(() => {
+          setInterestedProviders((prev2) =>
+            prev2.some((x) => x.id === p.id) ? prev2 : [...prev2, p]
+          );
+          // Auto-dismiss after 12s
+          setTimeout(() => {
+            setInterestedProviders((prev2) => prev2.filter((x) => x.id !== p.id));
+          }, 12000);
+        }, 2500 + i * 4500);
+      });
+    }
+    // ===== end demo simulation =====
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#060911] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+    <div className="min-h-screen flex flex-col bg-[#05070d] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black">
+
+      {/* Animated brand aurora background */}
+      <div className="fixi-aurora" aria-hidden="true" />
+
+      {/* Floating demo tour launcher */}
+      <button
+        onClick={() => setIsTourOpen(true)}
+        className="fixed bottom-4 left-4 z-40 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-extrabold text-xs flex items-center gap-2 shadow-xl shadow-sky-500/25 active:scale-95 transition-all"
+      >
+        <PlayCircle className="w-4 h-4" />
+        <span>Ver cómo funciona</span>
+      </button>
 
       {/* Navbar with Auth & Support Controls */}
       <Navbar
@@ -318,6 +352,7 @@ export const Home: React.FC = () => {
           provider={chatTarget}
           currentUser={user}
           onMessageSent={handleMessageSent}
+          onProviderReply={handleMessageSent}
         />
 
         <RequestJobModal
@@ -352,6 +387,45 @@ export const Home: React.FC = () => {
           onClose={() => setIsSupportOpen(false)}
           userEmail={user?.email || 'invitado@gmail.com'}
           onTicketCreated={handleTicketCreated}
+        />
+
+        {/* Interactive guided demo tour */}
+        <DemoTour
+          isOpen={isTourOpen}
+          onClose={() => setIsTourOpen(false)}
+          onStepAction={(stepId) => {
+            if (stepId === 'contact' && providers.length > 0) {
+              const target = user ? providers[0] : providers[0];
+              setIsTourOpen(false);
+              if (!user) {
+                // log in demo user silently for the tour flow
+                setUser({ email: 'usuario.cliente@gmail.com', nombre: 'Matías Rossi', foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' });
+              }
+              setChatTarget(target);
+            } else if (stepId === 'request') {
+              setIsTourOpen(false);
+              setIsRequestJobOpen(true);
+            } else if (stepId === 'rate' && providers.length > 0) {
+              setIsTourOpen(false);
+              if (!user) {
+                setUser({ email: 'usuario.cliente@gmail.com', nombre: 'Matías Rossi', foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' });
+              }
+              setRatingTarget(providers[0]);
+            }
+          }}
+        />
+
+        {/* Demo: providers "interested" toasts after publishing a request */}
+        <ProviderInterestToast
+          interested={interestedProviders}
+          onDismiss={(id) => setInterestedProviders((prev) => prev.filter((p) => p.id !== id))}
+          onOpenChat={(p) => {
+            if (!user) {
+              setUser({ email: 'usuario.cliente@gmail.com', nombre: 'Matías Rossi', foto: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80' });
+            }
+            setInterestedProviders((prev) => prev.filter((x) => x.id !== p.id));
+            setChatTarget(p);
+          }}
         />
       </Suspense>
 

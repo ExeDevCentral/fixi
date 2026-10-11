@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { X, Send, MessageSquare, CheckCircle, ShieldAlert } from 'lucide-react';
 import { Proveedor, Mensaje, UserProfile } from '../types/database.types';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -10,6 +10,24 @@ interface ChatModalProps {
   provider: Proveedor | null;
   currentUser: UserProfile | null;
   onMessageSent?: (mensaje: Mensaje) => void;
+  onProviderReply?: (mensaje: Mensaje) => void;
+}
+
+/**
+ * Demo simulation: generates a realistic provider reply so the client
+ * can experience the full conversation flow (message → typing → reply).
+ */
+function buildDemoReply(provider: Proveedor, isFirstReply: boolean): string {
+  const cat = provider.categoria?.nombre || 'servicio';
+  if (isFirstReply) {
+    return `¡Hola! Gracias por escribir a ${provider.nombre} 👋. Trabajamos ${cat.toLowerCase()} en ${provider.zona?.nombre || 'la zona'}. Contame un poco más del trabajo (medidas, urgencia, dirección) y te paso presupuesto hoy mismo.`;
+  }
+  const followUps = [
+    'Perfecto, lo anoto. ¿Podés pasarme una foto o más detalles? Así te cierro el precio exacto.',
+    'Ten disponibilidad esta semana. Te dejo presupuesto estimado y coordinamos visita sin cargo.',
+    '¡Bárbaro! Quedo a la espera del detalle y te confirmo horario. Trabajo con garantía y factura.',
+  ];
+  return followUps[Math.floor(Math.random() * followUps.length)];
 }
 
 export const ChatModal: React.FC<ChatModalProps> = ({
@@ -18,11 +36,21 @@ export const ChatModal: React.FC<ChatModalProps> = ({
   provider,
   currentUser,
   onMessageSent,
+  onProviderReply,
 }) => {
   const [contenido, setContenido] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [providerTyping, setProviderTyping] = useState(false);
+  const [replyCount, setReplyCount] = useState(0);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  // Cleanup simulated timers on unmount
+  useEffect(() => {
+    const timers = timersRef.current;
+    return () => timers.forEach(clearTimeout);
+  }, []);
 
   if (!isOpen || !provider) return null;
 
@@ -82,12 +110,33 @@ export const ChatModal: React.FC<ChatModalProps> = ({
         }).catch(console.error);
       }
 
+      setContenido('');
       setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        setContenido('');
-        onClose();
-      }, 1500);
+      setTimeout(() => setSuccess(false), 1200);
+
+      // ===== DEMO: simulate provider reply with typing indicator =====
+      if (!isSupabaseConfigured) {
+        const t1 = setTimeout(() => setProviderTyping(true), 900);
+        const t2 = setTimeout(() => {
+          setProviderTyping(false);
+          const reply = buildDemoReply(provider, replyCount === 0);
+          const replyMsg: Mensaje = {
+            id: `msg-${Date.now()}-reply`,
+            emisor_email: targetEmail,
+            receptor_email: currentUser.email,
+            proveedor_id: provider.id,
+            contenido: reply,
+            leido: true,
+            created_at: new Date().toISOString(),
+            proveedor: provider,
+          };
+          setReplyCount((c) => c + 1);
+          onProviderReply?.(replyMsg);
+        }, 3200);
+        timersRef.current.push(t1, t2);
+        return;
+      }
+      // ===== end demo simulation =====
 
     } catch (err: any) {
       console.error('Error enviando mensaje:', err);
@@ -99,8 +148,8 @@ export const ChatModal: React.FC<ChatModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md">
-      <div className="glass-card w-full max-w-md rounded-3xl p-6 sm:p-8 border border-slate-700 shadow-2xl relative bg-[#0f172a] text-white">
-        
+      <div className="gradient-border w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl relative text-white max-h-[90vh] overflow-y-auto">
+
         {/* Close button */}
         <button
           onClick={onClose}
@@ -130,8 +179,19 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               <div>
                 <h3 className="text-base font-bold text-white leading-snug">{provider.nombre}</h3>
                 <p className="text-xs text-emerald-400 flex items-center gap-1">
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  Mensaje directo privado
+                  {providerTyping ? (
+                    <>
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                      <span className="typing-dot" />
+                      <span className="ml-1 text-emerald-300">Escribiendo…</span>
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="w-3.5 h-3.5" />
+                      Mensaje directo privado
+                    </>
+                  )}
                 </p>
               </div>
             </div>
@@ -159,12 +219,18 @@ export const ChatModal: React.FC<ChatModalProps> = ({
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-400 hover:to-green-500 text-slate-950 font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 active:scale-95 transition-all btn-shine"
               >
                 <Send className="w-4 h-4" />
                 <span>{submitting ? 'Enviando...' : 'Enviar Mensaje Directo'}</span>
               </button>
             </form>
+
+            {!isSupabaseConfigured && (
+              <p className="text-[10px] text-center text-slate-500 mt-3">
+                💡 Modo demo: el profesional te responderá automáticamente en unos segundos.
+              </p>
+            )}
           </>
         )}
 

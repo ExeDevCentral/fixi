@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, MessageCircle, Star, ShieldCheck, Tag, ExternalLink, Navigation } from 'lucide-react';
+import { MapPin, MessageCircle, Star, ShieldCheck, Tag, ExternalLink, Navigation, Timer } from 'lucide-react';
 import { Proveedor } from '../types/database.types';
 
 interface ProviderCardProps {
@@ -38,11 +38,11 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       whileHover={{ y: -5 }}
       transition={{ duration: 0.25 }}
-      className="glass-card rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col justify-between border border-slate-800/80 hover:border-emerald-500/40 transition-all duration-300 group shadow-xl hover:shadow-2xl"
+      className="gradient-border rounded-2xl sm:rounded-3xl overflow-hidden flex flex-col justify-between transition-all duration-300 group shadow-xl hover:shadow-2xl hover:shadow-emerald-950/60 hover:-translate-y-1"
     >
       <div>
         {/* Header Photo */}
-        <div className="relative h-48 w-full overflow-hidden bg-slate-900">
+        <div className="relative h-44 w-full overflow-hidden bg-slate-900">
           <img
             src={imageUrl}
             alt={provider.nombre}
@@ -71,7 +71,7 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
 
         {/* Card Body */}
         <div className="p-5">
-          
+
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
             <div className="flex flex-wrap items-center gap-1.5">
               {provider.categoria && (
@@ -108,7 +108,28 @@ export const ProviderCard: React.FC<ProviderCardProps> = ({
             )}
           </div>
 
-          <h3 className="text-lg sm:text-xl font-extrabold text-white group-hover:text-emerald-400 transition-colors mb-2 line-clamp-1 font-sans">
+          {/* Rating + response time strip */}
+          <div className="flex items-center justify-between gap-2 mb-2">
+            {provider.rating_promedio != null ? (
+              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-white">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                {provider.rating_promedio.toFixed(1)}
+                <span className="text-[11px] font-medium text-slate-400">
+                  ({provider.cantidad_resenas} reseñas)
+                </span>
+              </span>
+            ) : (
+              <span className="text-[11px] text-slate-500">Sin reseñas aún</span>
+            )}
+            {provider.tiempo_respuesta && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full">
+                <Timer className="w-3 h-3" />
+                {provider.tiempo_respuesta}
+              </span>
+            )}
+          </div>
+
+          <h3 className="text-lg sm:text-xl font-extrabold text-white group-hover:text-emerald-400 transition-colors mb-2 line-clamp-1">
             {provider.nombre}
           </h3>
 

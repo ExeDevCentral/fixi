@@ -42,6 +42,9 @@ export interface Proveedor {
   created_at?: string;
   categoria?: Categoria;
   zona?: Zona;
+  rating_promedio?: number;
+  cantidad_resenas?: number;
+  tiempo_respuesta?: string;
 }
 
 export interface Resena {
