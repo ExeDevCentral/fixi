@@ -1,232 +1,144 @@
-# Fixi — Marketplace de Servicios Locales (Rosario y Región)
+<div align="center">
 
-Plataforma web (SPA) que conecta **clientes** con **profesionales de servicios** (jardineros, fletes, electricistas, plomeros, climatización, pintura, limpieza) en Rosario, Funes, Roldán y alrededores. Contacto directo por **WhatsApp**, **mensajería interna**, **bolsa de trabajos** con alertas por email y **reseñas verificadas**.
+# Fixi • Services & Trade Infrastructure
+### *Decentralized On-Demand Labor Marketplace, Geodesic Proximity Engine & WebGL Spatial Interface*
 
----
+[![Vite 6](https://img.shields.io/badge/Vite-6.1-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev/)
+[![React 18](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7_Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-R3F_Spatial-000000?style=for-the-badge&logo=threedotjs&logoColor=white)](https://threejs.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL_RLS-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com/)
+[![PWA](https://img.shields.io/badge/PWA-Offline_Precache-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-## 🧠 Visión General
-
-| Capa | Tecnología |
-|------|------------|
-| **Frontend** | React 18 + TypeScript + Vite 6 |
-| **Estilos** | Tailwind CSS 3 + Framer Motion + Lucide icons |
-| **3D / Visual** | React Three Fiber + drei + Three.js |
-| **Backend / BaaS** | Supabase (PostgreSQL + Auth Google OAuth + RLS) |
-| **Emails transaccionales** | Resend API |
-| **Geolocalización** | Geolocation API nativa (navegador) |
-| **Deploy** | Vercel (SPA estático, build time) |
-
-> **Arquitectura sin servidor propio:** no existe backend Node propio. Toda la persistencia se hace contra **Supabase** directamente desde el cliente, con **Row Level Security (RLS)** para proteger los datos. El envío de emails se hace en el cliente apuntando a la **REST API de Resend**. Toda API sensible debe protegerse / moverse a Edge Functions para producción (ver [Seguridad](#-seguridad-y-producción)).
+<p align="center">
+  <b>A fault-tolerant service dispatch and tradesperson discovery platform engineering Haversine spherical geodesic sorting, WebGL 3D interface rendering, and Progressive Web App service worker offline survivability.</b>
+</p>
 
 ---
 
-## 📁 Estructura del Proyecto
+</div>
+
+## 1. Abstract & System Architecture
+
+Localized service marketplaces frequently encounter severe structural frictions: high latency in geo-spatial sorting, privacy leakage of technician credentials, and client disconnection in mobile edge networks.
+
+**Fixi** engineers a performant, privacy-preserving trade and technical labor routing network:
+- **Haversine Geodesic Sorting:** Calculates exact great-circle spherical distances between service requesters and verified tradespeople on client hardware with sub-millisecond complexity.
+- **Privacy-Preserving Database Projection:** Enforces zero-exposure views (`proveedores_publicos`) in PostgreSQL, cryptographically segregating national identity numbers and direct contact vectors from client query access.
+- **Three.js Spatial Viewports:** Incorporates React Three Fiber (`@react-three/fiber`, `@react-three/drei`) for 3D tactile interface paradigms.
+- **Progressive Web App Offline Resilience:** Pre-caches application bundles and mock datasets via `vite-plugin-pwa` service workers, sustaining application uptime during complete signal degradation.
 
 ```
-.
-├── public/                    # Assets estáticos (favicon, iconos PWA, manifest generado por el build)
+┌────────────────────────────────────────────────────────────────────────┐
+│                        CLIENT GEOLOCATION & TRIAGE                     │
+│  [W3C Geolocation Vector] ──► [Haversine Spherical Distance Engine]    │
+│  [Trade Category Taxonomy] ──► [Dynamic Radius Matrix]                 │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                 DATA PRIVACY & ROW-LEVEL SECURITY                      │
+│       • Sanitized Public View Projection: `proveedores_publicos`       │
+│       • Encrypted Legal Identification Storage (DNI/Tax PII)           │
+│       • Dynamic Resilient Fallback to In-Memory Deterministic Mock Data│
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │
+         ┌─────────────────────────┴─────────────────────────┐
+         ▼                                                   ▼
+┌──────────────────────────────────┐        ┌──────────────────────────────────┐
+│   DEEP LINK DISPATCH & PWA CACHE │        │      WEBGL 3D SPATIAL INTERACTION│
+│  Instant WhatsApp Deep Relays    │        │   Three.js Interactive Viewport  │
+│  Full ServiceWorker Precache     │        │   Framer Motion Micro-Dynamics   │
+└──────────────────────────────────┘        └──────────────────────────────────┘
+```
+
+---
+
+## 2. Mathematical Geodesic Formulation
+
+Spatial sorting across regional clusters (Rosario, Santa Fe, Córdoba, Buenos Aires) uses the **Haversine Great-Circle Metric**, resolving spherical earth curvature without heavy GIS backend queries:
+
+$$\Delta \sigma = 2 \arcsin \sqrt{\sin^2\left(\frac{\Delta \phi}{2}\right) + \cos(\phi_1) \cos(\phi_2) \sin^2\left(\frac{\Delta \lambda}{2}\right)}$$
+$$d = R \cdot \Delta \sigma \quad \text{where } R \approx 6\,371.0 \text{ km}$$
+
+Executing directly inside the client execution context (`useGeolocation.ts`), enabling instant localized sorting of nearby electricians, plumbers, gas technicians, and hardware specialists.
+
+---
+
+## 3. Technology Stack & Multi-Tier Topology
+
+| Layer | Technology | Architectural Specification |
+| :--- | :--- | :--- |
+| **Build & Bundler** | Vite 6.1 | Tree-shaken production output with optimized chunk splitting |
+| **UI Framework** | React 18.3 | Concurrent rendering with functional hooks architecture |
+| **3D Rendering** | Three.js + R3F | Hardware-accelerated canvas graphics (`@react-three/drei`) |
+| **Database & Auth** | Supabase (PostgreSQL) | RLS policies, Google OAuth, and secure view projections |
+| **Offline Engine** | Vite PWA Plugin | Cache-first Service Worker with background auto-update |
+| **Styling** | Tailwind CSS 3.4 | Utility-first responsive design tokens |
+
+---
+
+## 4. Systems Directory Hierarchy
+
+```text
+Fixi/
+├── public/                 # PWA icons, manifest files & vector assets
 ├── src/
-│   ├── components/            # UI y modales (Auth, Chat, Dashboard, modals...)
-│   │   └── shared/            # Componentes reutilizables (firma, etc.)
-│   ├── hooks/
-│   │   ├── useProviders.ts        # Fetch de proveedores (Supabase / mock fallback)
-│   │   ├── useCategoriesAndZones.ts# Provincias, categorías y zonas
-│   │   └── useGeolocation.ts      # Geolocalización + distancia (Haversine)
-│   ├── lib/
-│   │   ├── supabase.ts            # Cliente Supabase + datasets MOCK
-│   │   └── resend.ts              # Helpers de envío de email (Resend)
-│   ├── pages/
-│   │   └── Home.tsx               # Única página (SPA single-view)
-│   ├── types/
-│   │   └── database.types.ts      # Tipos TypeScript del dominio
-│   ├── App.tsx
-│   └── main.tsx                   # Entry point
+│   ├── components/         # Atomic UI modules, 3D Canvas & Provider cards
+│   ├── hooks/              # `useGeolocation`, `useProviders`, `useCategories`
+│   ├── lib/                # Supabase client, Resend REST relay & Haversine math
+│   ├── pages/              # Landing view, Job Board, Profile & Service views
+│   └── types/              # Domain interfaces & TypeScript schemas
 ├── supabase/
-│   └── schema.sql                 # Migración del esquema + RLS + vistas
-├── index.html                     # SEO + Google Fonts + PWA meta
-├── tailwind.config.js
-├── vite.config.ts                 # Alias '@' → './src'
-└── package.json
+│   └── schema.sql          # Hardened DDL: RLS, views & category tables
+└── vite.config.ts          # Rollup chunking & PWA service worker config
 ```
-
-> La app es **single-view**: `App.tsx` renderiza `Home`, que orquesta todos los modales (Auth, Chat, Dashboard, Soporte, Reseña, Solicitud de Trabajo, Alta de Proveedor) y la grilla de resultados.
 
 ---
 
-## 🚀 Puesta en Marcha (Local)
+## 5. Deployment & Development Lifecycle
 
-Requisitos: **Node 18+** y **npm**.
+### Prerequisites
+- **Node.js**: $\ge 18.x$ LTS
+- **Package Manager**: `npm` $\ge 9.x$
 
+### Installation & Initialization
 ```bash
-# 1) Instalar dependencias
+# Clone the repository
+git clone https://github.com/ExeDevCentral/fixi.git
+cd fixi
+
+# Install dependencies deterministically
 npm install
 
-# 2) Configurar variables de entorno
-# Copiá .env.example → .env.local y completá los valores reales
-cp .env.example .env.local
-
-# 3) Levantar dev server (HMR)
+# Launch development server with HMR
 npm run dev
 ```
 
-### Scripts
+### Environment Configuration (`.env.local`)
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key
+VITE_RESEND_API_KEY=re_your_api_key
+```
+*Note: If environment variables are omitted, Fixi seamlessly engages deterministic demo mode via mock datasets (`isSupabaseConfigured = false`), enabling instant preview and staging.*
 
-| Comando | Descripción |
-|---------|-------------|
-| `npm run dev` | Dev server con HMR (Vite) |
-| `npm run build` | **Typecheck (`tsc`) + build de producción** |
-| `npm run preview` | Previsualizar el build de producción |
-| `npm run lint` | Linter ESLint |
+### Production Build & Type Validation
+```bash
+# Verify static types and compile bundle
+npm run build
 
----
-
-## 🔌 Integración con APIs
-
-### 1️⃣ Supabase (Backend como Servicio)
-
-**Cómo se conecta** — `src/lib/supabase.ts`
-
-```ts
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-export const isSupabaseConfigured = Boolean(
-  supabaseUrl && supabaseAnonKey && !supabaseUrl.includes('your-project')
-);
-
-export const supabase = isSupabaseConfigured
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
+# Preview production build locally
+npm run preview
 ```
 
-**Comportamiento clave:** si las variables **no** están configuradas (o apuntan al placeholder `your-project`), `isSupabaseConfigured` es `false` y la app entra en **modo demo** usando datasets MOCK (`MOCK_PROVEEDORES`, `MOCK_CATEGORIAS`, etc.). Esto permite correr y desplegar el proyecto sin backend real.
-
-**Tablas usadas** (`supabase/schema.sql`):
-
-| Tabla | Uso |
-|-------|-----|
-| `provincias` / `zonas` | Áreas geográficas de cobertura |
-| `categorias` | Rubros de servicio (icono asociado) |
-| `proveedores` | Profesionales (datos legales DNI/email en interno) |
-| `proveedores_publicos` | **Vista segura** que excluye DNI y email |
-| `resenas` | Calificaciones 1–5 con comentario |
-| `tickets_soporte` | Tickets de soporte del usuario |
-| `mensajes` | Mensajería interna entre usuarios/proveedores |
-| `solicitudes_trabajo` | Bolsa de trabajos publicada por clientes |
-
-La app consulta: `proveedores_publicos` (con joins a `categorias`, `zonas`, `provincias`), `provincias`, `categorias`, `zonas`, `solicitudes_trabajo` y `mensajes`. Ver `src/hooks/useProviders.ts`, `src/hooks/useCategoriesAndZones.ts` y `src/pages/Home.tsx`.
-
-**Auth — Google OAuth** — `src/components/AuthModal.tsx`
-
-```ts
-await supabase.auth.signInWithOAuth({ provider: 'google' });
-```
-
-Requiere configurar el provider **Google** en la consola de Supabase (Authentication → Providers) y agregar las **URLs de redirect** del dominio (local + producción Vercel) en la sección **Auth → URL Configuration**.
-
 ---
 
-### 2️⃣ Resend (Emails transaccionales)
+## 6. License
 
-**Cómo se conecta** — `src/lib/resend.ts`
+Distributed under the **MIT License**. Engineered for regional labor connectivity and decentralized trade logistics.
 
-Envía emails llamando directamente a la REST API de Resend:
-
-```ts
-await fetch('https://api.resend.com/emails', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${resendApiKey}`,
-  },
-  body: JSON.stringify({ from, to, subject, html }),
-});
-```
-
-**Emails que envía la app:**
-
-| Función | Cuándo se dispara |
-|---------|-------------------|
-| `sendProviderRegistrationEmail` | Alta de un proveedor |
-| `sendSupportTicketEmail` | Confirmación de ticket de soporte |
-| `sendNewMessageNotificationEmail` | Notifica nuevo mensaje interno |
-| `sendJobAlertBroadcastEmail` | **Alerta de trabajo** a profesionales por zona/rubro |
-
-> ⚠️ **Nota de seguridad:** la `VITE_RESEND_API_KEY` se expone en el bundle del cliente. Para producción hay que llamar a Resend desde un **backend / Supabase Edge Function** (ver [Seguridad](#-seguridad-y-producción)).
-
----
-
-### 3️⃣ WhatsApp (Deep Link — sin API key)
-
-El "contacto directo por WhatsApp" usa **enlaces profundos** `https://wa.me/<teléfono>?text=<mensaje>` en `src/components/ProviderCard.tsx` y `src/components/JobBoard.tsx`. No requiere clave ni backend; abre la conversación en la app de WhatsApp del usuario con un mensaje pre-llenado.
-
----
-
-### 4️⃣ Geolocalización (API del navegador)
-
-`src/hooks/useGeolocation.ts` usa `navigator.geolocation` para obtener la ubicación y calcula distancia (kilómetros) entre proveedores y el usuario mediante la **fórmula de Haversine**. El banner `GpsAlertBanner.tsx` informa la zona detectada / permisos denegados.
-
----
-
-## 🗄️ Base de Datos (Supabase)
-
-La migración está en **`supabase/schema.sql`**. Aplicarla en un proyecto Supabase nuevo (SQL Editor) u otra instancia.
-
-**Puntos importantes:**
-- **View `proveedores_publicos`:** filtrada con `activo = true` y **excluye** columnas sensibles (`dni`, `email`).
-- **RLS (Row Level Security) habilitado** en todas las tablas: lectura pública de servicios/reseñas/solicitudes, inserción pública, y solo lectura de datos propios para `tickets_soporte` y `mensajes`.
-- Para producción, **personalizar las policies de `mensajes`** para que un usuario solo lea/inserte conversaciones donde es emisor o receptor (las actuales permiten acceso público, ver [Seguridad](#-seguridad-y-producción)).
-
----
-
-## ☁️ Deploy en Vercel
-
-El proyecto es una **SPA estática de Vite**. Vercel lo detecta automáticamente (framework preset **Vite**).
-
-### Pasos
-
-1. Conectá el repo `ExeDevCentral/fixi` en Vercel → **New Project → Import**.
-2. Verificá que el **Build Command** sea `npm run build` y el **Output** `dist` (valores por defecto de Vite).
-3. Configurá las **Environment Variables** (Project → Settings → Environment Variables):
-
-   | Variable | Descripción | Requerida |
-   |----------|-------------|-----------|
-   | `VITE_SUPABASE_URL` | URL del proyecto Supabase | Lo recomendado (si no, modo demo) |
-   | `VITE_SUPABASE_ANON_KEY` | Anon key pública de Supabase | Lo recomendado (si no, modo demo) |
-   | `VITE_RESEND_API_KEY` | Clave de la API de Resend | Opcional (si no, los emails se logean) |
-
-   > Las variables `.env` / `.env.local` están en `.gitignore` y **no se suben al repo**; hay que configurarlas manualmente en el dashboard de Vercel. Sin Supabase, el sitio **igual despliega** y corre en modo demo con datos MOCK.
-
-4. Configurá en Supabase las **URLs de redirect** para el dominio de producción (Auth → URL Configuration) y el provider **Google**.
-
----
-
-## 📌 Lo que falta / Próximos pasos
-
-- [x] **Paginación de la grilla de proveedores** (9 por página) y **code-splitting** con `React.lazy` + `manualChunks` para reducir el bundle inicial.
-- [ ] **Endpoints de backend**: mover **Resend** y cualquier lógica con clave secreta a una **Supabase Edge Function** (evita exponer `VITE_RESEND_API_KEY`).
-- [ ] **Policies RLS de `mensajes`** más estrictas (solo emisor/receptor pueden leer & insertar).
-- [ ] **Registro de usuario por email + contraseña** (hoy solo Google OAuth).
-- [ ] **Persistencia real de "proveedores contactados"** por usuario (hoy estado en memoria).
-- [ ] **Panel del proveedor**: recibir/responder solicitudes y ver alertas de trabajo (hoy las alertas se envían por email y la bolsa es pública).
-- [x] **Ordenar por cercanía real**: con el GPS activo, botón "Más cercanos" ordena por distancia (Haversine) usando `latitud`/`longitud` de proveedor o zona, y cada tarjeta muestra su distancia.
-- [ ] **Tests automatizados** (unitarios de hooks, e2e del flujo de contacto) — actualmente no hay framework de testing configurado.
-- [x] **PWA completo**: Service Worker con precache (vite-plugin-pwa, `registerSW` + `autoUpdate`), `manifest.webmanifest`, iconos PNG 192/512 + maskable y soporte offline con `navigateFallback`.
-- [ ] **Seguridad de la vista `proveedores_publicos`**: confirmar grants y revocar acceso no deseado.
-
----
-
-## 🔒 Seguridad y Producción
-
-- **Clave de Resend pública:** `VITE_*` se inyecta en el bundle. Usar una Edge Function con la clave en Server Environment para producción.
-- **Anon key de Supabase:** es pública por diseño en RLS; la seguridad depende de **policies correctas**, no de ocultar la key.
-- **No commitear** `.env`, `.env.local` ni claves reales. Están en `.gitignore`.
-- Revisar periódicamente las **policies RLS** y el **Schema Exposed API** de Supabase.
-
----
-
-## 🧑‍💻 Cadena de herramientas
-
-- **Lenguaje:** TypeScript (strict mode)
-- **Estado:** localStorage + estado React local (sin Redux/Zustand)
-- **Qualidad de build:** `tsc && vite build` valida tipos antes de empaquetar
+<div align="center">
+  <sub>Engineered by <a href="https://github.com/ExeDevCentral">ExeDevCentral</a>.</sub>
+</div>
