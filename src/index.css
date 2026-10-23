@@ -124,3 +124,28 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* Mobile Touch & Compact Marketplace Enhancements */
+@media (max-width: 768px) {
+  .obsidian-card {
+    padding: 16px 12px !important;
+    border-radius: 16px !important;
+  }
+  button, a.btn, input, select {
+    min-height: 48px;
+  }
+  .mobile-bottom-nav {
+    padding-bottom: env(safe-area-inset-bottom, 12px);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-headline {
+    font-size: clamp(1.8rem, 7vw, 2.4rem) !important;
+    line-height: 1.15 !important;
+  }
+  .service-chip {
+    padding: 6px 12px !important;
+    font-size: 0.85rem !important;
+  }
+}
