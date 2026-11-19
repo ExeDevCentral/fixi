@@ -7,7 +7,7 @@ import { JobBoard } from '../components/JobBoard';
 import { GpsAlertBanner } from '../components/GpsAlertBanner';
 import { DemoTour } from '../components/DemoTour';
 import { ProviderInterestToast } from '../components/ProviderInterestToast';
-import { PlayCircle, Sparkles } from 'lucide-react';
+import { PlayCircle, Sparkles, LayoutGrid, PlusCircle, UserCheck } from 'lucide-react';
 import { Footer } from '../components/Footer';
 import { FixiSimulatorEngine } from '../components/simulator/FixiSimulatorEngine';
 import { TopographicBackground } from '../components/TopographicBackground';
@@ -220,19 +220,80 @@ export const Home: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#06080d] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black relative">
+    <div className="min-h-screen pb-24 md:pb-0 flex flex-col bg-[#06080d] text-slate-100 font-sans selection:bg-emerald-500 selection:text-black relative">
 
       {/* Topographic organic relief lines with traveling pulse waves */}
       <TopographicBackground />
 
-      {/* Floating demo tour launcher */}
+      {/* Floating demo tour launcher (Desktop >= md; en celular vive en el dock inferior) */}
       <button
         onClick={() => setIsTourOpen(true)}
-        className="fixed bottom-4 left-4 z-40 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-extrabold text-xs flex items-center gap-2 shadow-xl shadow-sky-500/25 active:scale-95 transition-all"
+        className="hidden md:flex fixed bottom-4 left-4 z-40 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-500 hover:from-sky-400 hover:to-indigo-400 text-white font-extrabold text-xs items-center gap-2 shadow-xl shadow-sky-500/25 active:scale-95 transition-all"
       >
         <PlayCircle className="w-4 h-4" />
         <span>Ver cómo funciona</span>
       </button>
+
+      {/* Mobile Only Ergonomic Bottom Dock (< md) — Minimalista, bien espaciado, sin superponerse */}
+      <nav
+        aria-label="Navegación rápida móvil de FIXI"
+        className="md:hidden fixed bottom-3 inset-x-3 z-50 select-none pb-[env(safe-area-inset-bottom)]"
+      >
+        <div className="mx-auto max-w-md rounded-2xl border border-white/15 bg-[#090d16]/95 backdrop-blur-2xl shadow-[0_14px_36px_rgba(0,0,0,0.65)] p-1.5 grid grid-cols-5 items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveViewMode('APP_FIRST')}
+            className={`flex flex-col items-center justify-center py-1.5 rounded-xl transition-all ${
+              activeViewMode === 'APP_FIRST'
+                ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30'
+                : 'text-slate-400'
+            }`}
+          >
+            <Sparkles className="w-4 h-4" />
+            <span className="text-[10px] font-semibold mt-1 leading-none">Simulador</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveViewMode('DIRECTORY')}
+            className={`flex flex-col items-center justify-center py-1.5 rounded-xl transition-all ${
+              activeViewMode === 'DIRECTORY'
+                ? 'bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30'
+                : 'text-slate-400'
+            }`}
+          >
+            <LayoutGrid className="w-4 h-4" />
+            <span className="text-[10px] font-semibold mt-1 leading-none">Directorio</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsRequestJobOpen(true)}
+            className="flex flex-col items-center justify-center py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-extrabold shadow-sm active:scale-95 transition-all"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span className="text-[10px] font-extrabold mt-1 leading-none">+ Trabajo</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsTourOpen(true)}
+            className="flex flex-col items-center justify-center py-1.5 rounded-xl text-sky-400 active:scale-95 transition-all"
+          >
+            <PlayCircle className="w-4 h-4" />
+            <span className="text-[10px] font-semibold mt-1 leading-none">Tour</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => (user ? setIsDashboardOpen(true) : setIsAuthOpen(true))}
+            className="flex flex-col items-center justify-center py-1.5 rounded-xl text-slate-300 active:scale-95 transition-all"
+          >
+            <UserCheck className="w-4 h-4" />
+            <span className="text-[10px] font-semibold mt-1 leading-none">{user ? 'Cuenta' : 'Acceso'}</span>
+          </button>
+        </div>
+      </nav>
 
       {/* Navbar with Auth & Support Controls and Mode Switcher */}
       <Navbar

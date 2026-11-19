@@ -20,7 +20,7 @@ export const ProviderInterestToast: React.FC<ProviderInterestToastProps> = ({
   onOpenChat,
 }) => {
   return (
-    <div className="fixed bottom-4 right-4 z-[70] flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none">
+    <div className="fixed bottom-24 md:bottom-4 right-4 z-[70] flex flex-col gap-2 max-w-xs sm:max-w-sm pointer-events-none">
       <AnimatePresence>
         {interested.map((p) => (
           <motion.div
